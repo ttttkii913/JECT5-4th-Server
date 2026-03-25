@@ -1,4 +1,4 @@
-package com.sossbar.sossbar;
+package com.sossbar;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
