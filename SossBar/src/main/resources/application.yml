@@ -23,3 +23,11 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
+
+jwt:
+  secret: ${JWT_SECRET}
+  expire-time: ${JWT_EXPIRE_TIME}
+
+kakao:
+  client-id: ${KAKAO_CLIENT_ID}
+  redirect-uri: ${KAKAO_REDIRECT_URI}
