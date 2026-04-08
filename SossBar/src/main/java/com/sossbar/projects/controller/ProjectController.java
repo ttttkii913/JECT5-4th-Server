@@ -16,6 +16,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
@@ -29,10 +31,11 @@ public class ProjectController {
     @Operation(summary = "프로젝트 생성", description = "새 프로젝트를 생성하는 API입니다.")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResTemplate<ProjectResponse> createProject(
+            Principal principal,
             @RequestPart("request") @Valid ProjectCreateRequest request,
             @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        return ApiResTemplate.successResponse(SuccessCode.CREATE_SUCCESS, projectFacade.createProject(request, image));
+        return ApiResTemplate.successResponse(SuccessCode.CREATE_SUCCESS, projectFacade.createProject(principal, request, image));
     }
 
     @Operation(summary = "프로젝트 조회", description = "프로젝트 ID로 단일 프로젝트를 조회하는 API입니다.")

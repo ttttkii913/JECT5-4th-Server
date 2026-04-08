@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,7 +24,7 @@ public class ProjectFacade {
 
     private static final String S3_DIR = "project";
 
-    public ProjectResponse createProject(ProjectCreateRequest request, MultipartFile image) {
+    public ProjectResponse createProject(Principal principal, ProjectCreateRequest request, MultipartFile image) {
         // 1. 이미지가 있으면 S3 업로드
         String imageUrl = null;
         if (image != null && !image.isEmpty()) {
@@ -31,7 +33,7 @@ public class ProjectFacade {
 
         // 2. DB 저장 - 실패 시 S3 보상 삭제
         try {
-            return projectService.createProject(request, imageUrl);
+            return projectService.createProject(principal, request, imageUrl);
         } catch (Exception e) {
             log.error("[ProjectFacade] {} {}", ErrorCode.PROJECT_CREATE_ROLLBACK_EXCEPTION.getMessage(), imageUrl, e);
             s3Service.deleteFile(imageUrl);

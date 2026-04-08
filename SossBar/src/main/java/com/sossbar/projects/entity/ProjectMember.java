@@ -1,5 +1,6 @@
 package com.sossbar.projects.entity;
 
+import com.sossbar.global.common.template.BaseTimeEntity;
 import com.sossbar.projects.enums.MemberStatus;
 import com.sossbar.user.entity.User;
 import jakarta.persistence.*;
@@ -11,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class ProjectMember {
+public class ProjectMember extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
