@@ -1,6 +1,10 @@
 spring:
   profiles:
     active: prod
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
   datasource:
     url: ${spring.datasource.url}
@@ -31,3 +35,16 @@ jwt:
 kakao:
   client-id: ${KAKAO_CLIENT_ID}
   redirect-uri: ${KAKAO_REDIRECT_URI}
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${CLOUD_AWS_CREDENTIALS_ACCESS_KEY}
+      secret-key: ${CLOUD_AWS_CREDENTIALS_SECRET_KEY}
+    s3:
+      bucket: ${CLOUD_AWS_S3_BUCKET}
+      url: ${CLOUD_AWS_S3_URL}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
