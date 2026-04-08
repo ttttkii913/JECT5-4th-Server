@@ -1,6 +1,8 @@
 package com.sossbar.user.entity;
 
 import com.sossbar.global.common.template.BaseTimeEntity;
+import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
+import com.sossbar.user.dto.request.UserOnboardingReqDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -34,5 +36,17 @@ public class User extends BaseTimeEntity {
         this.bio = bio;
         this.profileImageUrl = profileImageUrl;
         this.userType = userType;
+    }
+
+    public void onboarding(UserOnboardingReqDto userInfoSaveReqDto, String profileImageUrl) {
+        this.username = userInfoSaveReqDto.username();
+        this.bio = userInfoSaveReqDto.bio();
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public void updateUserInfo(UserInfoUpdateReqDto userInfoUpdateReqDto, String profileImageUrl) {
+        this.nickname = userInfoUpdateReqDto.nickname();
+        this.bio = userInfoUpdateReqDto.bio();
+        this.profileImageUrl = profileImageUrl;
     }
 }
