@@ -4,6 +4,7 @@ import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.projects.dto.request.ProjectCreateRequest;
 import com.sossbar.projects.dto.request.ProjectUpdateRequest;
+import com.sossbar.projects.dto.response.ProjectMemberResponse;
 import com.sossbar.projects.dto.response.ProjectResponse;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -59,11 +61,13 @@ public class ProjectService {
                 .build();
         projectMemberRepository.save(projectMember);
 
-        return toResponse(project);
+        return toResponse(project, List.of(projectMember));
     }
 
     public ProjectResponse getProject(Long projectId) {
-        return toResponse(findProjectById(projectId));
+        Project project = findProjectById(projectId);
+        List<ProjectMember> members = projectMemberRepository.findAllByProject(project);
+        return toResponse(project, members);
     }
 
     @Transactional
@@ -71,7 +75,8 @@ public class ProjectService {
         Project project = findProjectById(projectId);
         project.update(request.getProjectName(), request.getHost(),
                 request.getStartDate(), request.getEndDate(), newImageUrl);
-        return toResponse(project);
+        List<ProjectMember> members = projectMemberRepository.findAllByProject(project);
+        return toResponse(project, members);
     }
 
     public String getProjectImageUrl(Long projectId) {
@@ -96,7 +101,17 @@ public class ProjectService {
     }
 
     // Project -> ProjectResponse 변환
-    private ProjectResponse toResponse(Project project) {
+    private ProjectResponse toResponse(Project project, List<ProjectMember> members) {
+        List<ProjectMemberResponse> memberResponses = members.stream()
+                .map(pm -> ProjectMemberResponse.builder()
+                        .projectMemberId(pm.getProjectMemberId())
+                        .userId(pm.getUser().getId())
+                        .username(pm.getUser().getUsername())
+                        .profileImageUrl(pm.getUser().getProfileImageUrl())
+                        .memberStatus(pm.getMemberStatus())
+                        .build())
+                .toList();
+
         return ProjectResponse.builder()
                 .projectId(project.getProjectId())
                 .projectName(project.getProjectName())
@@ -106,6 +121,7 @@ public class ProjectService {
                 .projectLink(project.getProjectLink())
                 .projectImage(project.getProjectImage())
                 .projectStatus(project.getProjectStatus())
+                .members(memberResponses)
                 .build();
     }
 }

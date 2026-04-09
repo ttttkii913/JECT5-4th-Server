@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -22,4 +23,5 @@ public class ProjectResponse {
     private String projectLink;
     private String projectImage;
     private ProjectStatus projectStatus;
+    private List<ProjectMemberResponse> members;
 }
