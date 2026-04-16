@@ -19,8 +19,7 @@ INSERT INTO tag(tag_name) VALUES ('고마움을 잘 표현해요');
 INSERT INTO tag(tag_name) VALUES ('먼저 친근하게 다가와요');
 INSERT INTO tag(tag_name) VALUES ('모르는 것을 숨기지 않고 물어봐요');
 
-INSERT INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('1번 항목', '원칙 준수', '혁신 제안');
-INSERT INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('2번 항목', '유연한 대처', '철저한 계획');
-INSERT INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('3번 항목', '묵묵한 조력', '당당한 리드');
-INSERT INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('4번 항목', '냉정한 과업', '따뜻한 관계');
-INSERT INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('5번 항목', '침착한 대응', '빈틈없는 대비');
+INSERT INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('1번 항목', '서포트형', '리드형');
+INSERT INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('2번 항목', '빠른 작업 속도 중시', '천천히 신중한 고민 중시');
+INSERT INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('3번 항목', '상황별 유연한 대처', '철저한 계획 기반 실행');
+INSERT INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('4번 항목', '냉철한 결과 지향', '따뜻한 관계 지향');

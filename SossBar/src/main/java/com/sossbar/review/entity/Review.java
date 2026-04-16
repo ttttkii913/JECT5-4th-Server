@@ -1,5 +1,6 @@
 package com.sossbar.review.entity;
 
+import com.sossbar.projects.entity.Project;
 import com.sossbar.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,15 +25,15 @@ public class Review {
     private String negativeFeedback;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reviewer_id", insertable = false, updatable = false)
+    @JoinColumn(name = "reviewer_id")
     private User reviewer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reviewee_id", insertable = false, updatable = false)
+    @JoinColumn(name = "reviewee_id")
     private User reviewee;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", insertable = false, updatable = false)
+    @JoinColumn(name = "project_id")
     private Project project;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)

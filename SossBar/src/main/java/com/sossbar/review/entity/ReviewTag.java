@@ -4,11 +4,14 @@ import com.sossbar.tag.entity.Tag;
 import com.sossbar.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class ReviewTag {
 
     @Id
@@ -16,11 +19,11 @@ public class ReviewTag {
     private Long reviewTagId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "review_id", insertable = false, updatable = false)
+    @JoinColumn(name = "review_id")
     private Review review;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id", insertable = false, updatable = false)
+    @JoinColumn(name = "tag_id")
     private Tag tag;
 
     public void setReview(Review review) {
@@ -31,9 +34,4 @@ public class ReviewTag {
         this.tag = tag;
     }
 
-    @Builder
-    public ReviewTag(Review review, Tag tag) {
-        this.review = review;
-        this.tag = tag;
-    }
 }

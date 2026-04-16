@@ -3,11 +3,14 @@ package com.sossbar.review.entity;
 import com.sossbar.spectrumaxis.entity.SpectrumAxis;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class ReviewSpectrum {
 
     @Id
@@ -33,10 +36,4 @@ public class ReviewSpectrum {
         this.spectrumAxis = spectrumAxis;
     }
 
-    @Builder
-    public ReviewSpectrum(Review review, SpectrumAxis spectrumAxis, Integer strength) {
-        this.review = review;
-        this.spectrumAxis = spectrumAxis;
-        this.strength = strength;
-    }
 }
