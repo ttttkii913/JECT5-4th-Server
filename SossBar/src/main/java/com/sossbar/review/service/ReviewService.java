@@ -12,6 +12,7 @@ import com.sossbar.review.repository.ReviewSpectrumRepository;
 import com.sossbar.review.repository.ReviewTagRepository;
 import com.sossbar.spectrumaxis.entity.SpectrumAxis;
 import com.sossbar.spectrumaxis.repository.SpectrumAxisRepository;
+import com.sossbar.tag.entity.Tag;
 import com.sossbar.tag.repository.TagRepository;
 import com.sossbar.user.entity.User;
 import com.sossbar.user.repository.UserRepository;
@@ -59,11 +60,23 @@ public class ReviewService {
 
         Review savedReview = reviewRepository.save(reviewReqDto.toEntity(reviewer, reviewee, project));
 
-        for (Long tagId : reviewReqDto.getTagIds()) {
-            reviewTagRepository.save(ReviewTag.builder()
-                    .review(savedReview)
-                    .tag(tagRepository.findById(tagId).orElseThrow(() -> new RuntimeException("해당 태그는 존재하지 않습니다: " + tagId)))
-                    .build());
+        // 태그 목록 저장
+        List<Long> tagIds = reviewReqDto.getTagIds();
+        if (tagIds != null && !tagIds.isEmpty()) {
+            List<Tag> tags = tagRepository.findAllById(tagIds);
+
+            if(tags.size() != tagIds.size()) {
+                throw new RuntimeException("일부 태그가 존재하지 않습니다.");
+            }
+
+            List<ReviewTag> reviewTags = tags.stream()
+                    .map(tag -> ReviewTag.builder()
+                            .review(savedReview)
+                            .tag(tag)
+                            .build())
+                    .collect(Collectors.toList());
+
+            reviewTagRepository.saveAll(reviewTags);
         }
 
         // 각 스펙트럼 축 당 저장하기
