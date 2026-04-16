@@ -21,7 +21,7 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @Operation(summary = "후기 작성", description = "사용자는 로그인 후 다른 사용자에 대한 후기를 남길 수 있습니다.")
-    @PostMapping("api/v1/reviews")
+    @PostMapping("/api/v1/reviews")
     public ApiResTemplate createReview(
             @RequestBody ReviewCreateReqDto reviewCreateReqDto,
             Principal principal
