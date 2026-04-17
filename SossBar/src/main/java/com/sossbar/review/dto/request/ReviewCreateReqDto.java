@@ -7,6 +7,6 @@ import java.util.List;
 // 통합 DTO
 @Getter
 public class ReviewCreateReqDto {
-    ReviewReqDto reviewReqDto;
-    List<SpectrumReqDto> spectrumReqDtos;
+    private ReviewReqDto reviewReqDto;
+    private List<SpectrumReqDto> spectrumReqDtos;
 }

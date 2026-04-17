@@ -9,5 +9,5 @@ import org.springframework.stereotype.Repository;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // 중복 리뷰 검증
-    boolean existsByReviewerAndReviewee(User Reviewer, User Reviewee);
+    boolean existsByReviewerAndReviewee(User reviewer, User reviewee);
 }
