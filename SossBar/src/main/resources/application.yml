@@ -12,7 +12,12 @@ spring:
     password: ${spring.datasource.password}
     driver-class-name: ${spring.datasource.driver-class-name}
 
+  sql:
+    init:
+      mode: always
+
   jpa:
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
       naming:
@@ -42,8 +47,8 @@ cloud:
       access-key: ${CLOUD_AWS_CREDENTIALS_ACCESS_KEY}
       secret-key: ${CLOUD_AWS_CREDENTIALS_SECRET_KEY}
     s3:
-      bucket: ${CLOUD_AWS_S3_BUCKET}
       url: ${CLOUD_AWS_S3_URL}
+      bucket: ${CLOUD_AWS_S3_BUCKET}
     region:
       static: ap-northeast-2
     stack:
