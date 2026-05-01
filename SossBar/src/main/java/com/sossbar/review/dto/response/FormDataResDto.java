@@ -6,7 +6,7 @@ import com.sossbar.tag.dto.response.TagResDto;
 import java.util.List;
 
 public record FormDataResDto (
-    List<TagResDto> tagResDtos,
-    List<SpectrumAxisResDto> spectrumAxisResDtos
+    List<TagResDto> tags,
+    List<SpectrumAxisResDto> spectrumAxes
 ) {
 }
