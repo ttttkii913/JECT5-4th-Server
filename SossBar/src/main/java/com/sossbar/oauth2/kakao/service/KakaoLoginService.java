@@ -89,7 +89,7 @@ public class KakaoLoginService {
     }
 
     // 전체 프로세스
-    public KakaoToken processLogin(String code) {
+    public User processLogin(String code) {
         String accessToken = getKakaoAccessToken(code);
         KakaoUserInfo kakaoUserInfo = getUserInfoFromKakao(accessToken);
 
@@ -114,8 +114,6 @@ public class KakaoLoginService {
                         .build())
         );
 
-        String jwt = jwtTokenProvider.generateToken(user);
-
-        return new KakaoToken(jwt);
+        return user;
     }
 }

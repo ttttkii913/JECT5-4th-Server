@@ -26,6 +26,7 @@ public enum ErrorCode {
     KAKAO_USER_INFO_FAILED(HttpStatus.BAD_GATEWAY, "카카오 사용자 정보 조회 실패", "AUTH-004"),
     KAKAO_EMAIL_NOT_FOUND(HttpStatus.BAD_REQUEST, "카카오 계정에 이메일이 없습니다.", "AUTH-005"),
     KAKAO_LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "카카오 로그인에 실패했습니다.", "AUTH-006"),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다.", "AUTH-007"),
 
     // IMAGE FILE
     FILE_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "파일이 없습니다.", "FILE-001"),

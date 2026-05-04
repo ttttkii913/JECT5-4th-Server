@@ -27,15 +27,17 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private UserType userType;
+    private String refreshToken;
 
     @Builder
-    public User(String username, String nickname, String email, String bio, String profileImageUrl, UserType userType) {
+    public User(String username, String nickname, String email, String bio, String profileImageUrl, UserType userType, String refreshToken) {
         this.username = username;
         this.nickname = nickname;
         this.email = email;
         this.bio = bio;
         this.profileImageUrl = profileImageUrl;
         this.userType = userType;
+        this.refreshToken = refreshToken;
     }
 
     public void onboarding(UserOnboardingReqDto userInfoSaveReqDto, String profileImageUrl) {
@@ -49,4 +51,9 @@ public class User extends BaseTimeEntity {
         this.bio = userInfoUpdateReqDto.bio();
         this.profileImageUrl = profileImageUrl;
     }
+
+    public void saveRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
 }
