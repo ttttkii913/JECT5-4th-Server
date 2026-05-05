@@ -7,6 +7,7 @@ import com.sossbar.projects.dto.request.ProjectUpdateRequest;
 import com.sossbar.projects.dto.response.MyProjectResponse;
 import com.sossbar.projects.dto.response.ProjectMemberResponse;
 import com.sossbar.projects.dto.response.ProjectResponse;
+import com.sossbar.projects.dto.response.PublicProjectResponse;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.projects.enums.MemberStatus;
@@ -88,6 +89,25 @@ public class ProjectService {
                 .toList();
     }
 
+    public List<PublicProjectResponse> getUserProjects(Long userId) {
+        // 1. 조회 대상 User 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
+
+        // 2. 해당 유저가 속한 ProjectMember 목록 조회 (fetch join으로 project 포함)
+        List<ProjectMember> memberships = projectMemberRepository.findAllByUser(user);
+
+        // 3. 각 Project의 전체 멤버 조회 후 PublicProjectResponse로 변환
+        // TODO: 후기 작성이 완료된 프로젝트만 외부에 노출할 경우 아래 filter 활성화
+        // 후기 작성 완료 상태 = ProjectStatus.ARCHIVED
+        // .filter(pm -> pm.getProject().getProjectStatus() == ProjectStatus.ARCHIVED)
+        return memberships.stream()
+                .map(pm -> toPublicResponse(pm.getProject()))
+                .toList();
+    }
+
     public ProjectResponse getProject(Long projectId) {
         Project project = findProjectById(projectId);
         List<ProjectMember> members = projectMemberRepository.findAllByProject(project);
@@ -157,6 +177,18 @@ public class ProjectService {
                 .projectStatus(project.getProjectStatus())
                 .myMemberStatus(myMembership.getMemberStatus())
                 .members(memberResponses)
+                .build();
+    }
+
+    // Project → PublicProjectResponse 변환
+    private PublicProjectResponse toPublicResponse(Project project) {
+        return PublicProjectResponse.builder()
+                .projectId(project.getProjectId())
+                .projectName(project.getProjectName())
+                .host(project.getHost())
+                .startDate(project.getStartDate())
+                .endDate(project.getEndDate())
+                .projectImage(project.getProjectImage())
                 .build();
     }
 
