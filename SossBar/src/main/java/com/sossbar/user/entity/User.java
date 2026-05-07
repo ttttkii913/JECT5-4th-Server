@@ -47,9 +47,13 @@ public class User extends BaseTimeEntity {
     }
 
     public void updateUserInfo(UserInfoUpdateReqDto userInfoUpdateReqDto, String profileImageUrl) {
-        this.nickname = userInfoUpdateReqDto.nickname();
+        this.username = userInfoUpdateReqDto.username();
         this.bio = userInfoUpdateReqDto.bio();
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public void updateUserNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public void saveRefreshToken(String refreshToken) {

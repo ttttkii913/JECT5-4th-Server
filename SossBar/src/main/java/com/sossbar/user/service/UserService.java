@@ -3,11 +3,12 @@ package com.sossbar.user.service;
 import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.global.config.S3Service;
+import com.sossbar.user.dto.request.UserNameUpdateReqDto;
 import com.sossbar.user.dto.request.UserOnboardingReqDto;
-import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
 import com.sossbar.user.dto.response.UserInfoResDto;
 import com.sossbar.user.entity.User;
 import com.sossbar.user.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +49,7 @@ public class UserService {
         return UserInfoResDto.from(user);
     }
 
-    // 마이페이지 - 내 프로필 조회
+    // 마이페이지 - 내 계정 정보 조회(닉네임, 이메일)
     public UserInfoResDto getUserInfo(Principal principal) {
         Long id = Long.parseLong(principal.getName());
         User user = getUserById(id);
@@ -56,36 +57,27 @@ public class UserService {
         return UserInfoResDto.from(user);
     }
 
-    // 마이페이지 - 내 프로필 수정
     @Transactional
-    public UserInfoResDto updateUserInfo(Principal principal, UserInfoUpdateReqDto userInfoUpdateReqDto, MultipartFile profileImage) {
+    // 마이페이지 - 내 닉네임 수정
+    public UserInfoResDto updateUserNickname(Principal principal, @Valid UserNameUpdateReqDto userNameUpdateReqDto) {
         Long id = Long.parseLong(principal.getName());
         User user = getUserById(id);
 
-        String newNickname = userInfoUpdateReqDto.nickname();
+        String newNickname = userNameUpdateReqDto.nickname();
 
-        // nickname 중복 체크 - 자신 제외
-        if (newNickname != null &&
-                userRepository.existsByNicknameAndIdNot(newNickname, user.getId())) {
+        // 닉네임 중복 체크 (본인 제외)
+        if (userRepository.existsByNicknameAndIdNot(
+                newNickname,
+                user.getId()
+        )) {
+
             throw new BusinessException(
                     ErrorCode.VALIDATION_ERROR,
                     "이미 사용 중인 닉네임입니다."
             );
         }
 
-        // 프로필 이미지 수정 처리 (기존 이미지 삭제 후 새 이미지 업로드)
-        String newProfileImageUrl = user.getProfileImageUrl();
-
-        if (profileImage != null && !profileImage.isEmpty()) {
-            // 기존 이미지가 존재한다면 S3에서 삭제
-            if (newProfileImageUrl != null && !newProfileImageUrl.isBlank()) {
-                s3Service.deleteFile(newProfileImageUrl);
-            }
-            // 새 이미지 업로드
-            newProfileImageUrl = s3Service.uploadFile(profileImage, "sossbar/profile");
-        }
-
-        user.updateUserInfo(userInfoUpdateReqDto, newProfileImageUrl);
+        user.updateUserNickname(newNickname);
 
         return UserInfoResDto.from(user);
     }
