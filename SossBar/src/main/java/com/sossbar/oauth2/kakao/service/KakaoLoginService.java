@@ -104,7 +104,6 @@ public class KakaoLoginService {
         ).orElseGet(() ->
                 userRepository.save(User.builder()
                         .email(kakaoUserInfo.getKakaoAccount().getEmail())
-                        .nickname(kakaoUserInfo.getProperties().getNickname())
                         .profileImageUrl(
                                 kakaoUserInfo.getKakaoAccount()
                                         .getProfile()

@@ -2,7 +2,6 @@ package com.sossbar.user.entity;
 
 import com.sossbar.global.common.template.BaseTimeEntity;
 import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
-import com.sossbar.user.dto.request.UserOnboardingReqDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,7 +17,6 @@ public class User extends BaseTimeEntity {
     @Column(name = "user_id")
     private Long id;
     private String username;
-    private String nickname;
 
     @Column(unique = true, nullable = false)
     private String email;
@@ -30,9 +28,8 @@ public class User extends BaseTimeEntity {
     private String refreshToken;
 
     @Builder
-    public User(String username, String nickname, String email, String bio, String profileImageUrl, UserType userType, String refreshToken) {
+    public User(String username, String email, String bio, String profileImageUrl, UserType userType, String refreshToken) {
         this.username = username;
-        this.nickname = nickname;
         this.email = email;
         this.bio = bio;
         this.profileImageUrl = profileImageUrl;
@@ -40,16 +37,18 @@ public class User extends BaseTimeEntity {
         this.refreshToken = refreshToken;
     }
 
-    public void onboarding(UserOnboardingReqDto userInfoSaveReqDto, String profileImageUrl) {
-        this.username = userInfoSaveReqDto.username();
-        this.bio = userInfoSaveReqDto.bio();
-        this.profileImageUrl = profileImageUrl;
-    }
-
     public void updateUserInfo(UserInfoUpdateReqDto userInfoUpdateReqDto, String profileImageUrl) {
-        this.nickname = userInfoUpdateReqDto.nickname();
-        this.bio = userInfoUpdateReqDto.bio();
-        this.profileImageUrl = profileImageUrl;
+        if (userInfoUpdateReqDto.username() != null) {
+            this.username = userInfoUpdateReqDto.username();
+        }
+
+        if (userInfoUpdateReqDto.bio() != null) {
+            this.bio = userInfoUpdateReqDto.bio();
+        }
+
+        if (profileImageUrl != null) {
+            this.profileImageUrl = profileImageUrl;
+        }
     }
 
     public void saveRefreshToken(String refreshToken) {
