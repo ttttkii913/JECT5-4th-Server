@@ -7,7 +7,10 @@ import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
 import com.sossbar.review.dto.request.ReviewReqDto;
 import com.sossbar.review.dto.request.SpectrumReqDto;
+import com.sossbar.review.dto.response.CommonReviewResDto;
 import com.sossbar.review.dto.response.ReviewCreateResDto;
+import com.sossbar.review.dto.response.ReviewPrivateResDto;
+import com.sossbar.review.dto.response.ReviewPublicResDto;
 import com.sossbar.review.entity.Review;
 import com.sossbar.review.entity.ReviewSpectrum;
 import com.sossbar.review.entity.ReviewTag;
@@ -119,4 +122,20 @@ public class ReviewService {
 
         return ReviewCreateResDto.from(savedReview, reviewTags, reviewSpectrums);
     }
+
+    public List<CommonReviewResDto> getReviews(Principal principal, Long userId) {
+        Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
+        List<Review> reviews = reviewRepository.findAllByRevieweeId(userId);
+
+        // 내가 내 전체 후기 조회
+        if(userId.equals(loginUserId)) {
+            return reviews.stream()
+                    .map(review -> (CommonReviewResDto) ReviewPrivateResDto.from(review))
+                    .toList();
+        }
+        // 다른 사용자 전체 후기 조회
+        return reviews.stream()
+                .map(review -> (CommonReviewResDto) ReviewPublicResDto.from(review))
+                .toList();
+        }
 }

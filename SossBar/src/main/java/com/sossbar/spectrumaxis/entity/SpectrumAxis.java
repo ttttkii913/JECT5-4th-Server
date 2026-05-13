@@ -20,7 +20,7 @@ public class SpectrumAxis {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long spectrumAxisId;
 
-    @Column
+    @Column(nullable = false, unique = true)
     private String axisName;
 
     @Column
