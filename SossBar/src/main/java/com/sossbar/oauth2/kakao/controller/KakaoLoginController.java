@@ -1,6 +1,7 @@
 package com.sossbar.oauth2.kakao.controller;
 
 import com.sossbar.global.common.code.ErrorCode;
+import com.sossbar.global.common.code.SuccessCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.global.common.template.ApiResTemplate;
 import com.sossbar.global.common.template.SwaggerApiResTemplate;
@@ -38,5 +39,10 @@ public class KakaoLoginController {
             throw new BusinessException(ErrorCode.UNAUTHORIZED_EXCEPTION, "리프레시 토큰이 없습니다.");
         }
         return refreshTokenService.getAccessTokenByRefreshToken(refreshToken);
+    }
+
+    @PostMapping("/test-account")
+    public ApiResTemplate<LoginInfoResDto> testLogin() {
+        return ApiResTemplate.successResponse(SuccessCode.SUCCESS, kakaoLoginService.testLogin());
     }
 }

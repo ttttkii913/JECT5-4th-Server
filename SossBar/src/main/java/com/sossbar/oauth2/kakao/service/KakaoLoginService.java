@@ -6,6 +6,7 @@ import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.oauth2.jwt.JwtTokenProvider;
 import com.sossbar.oauth2.kakao.dto.KakaoToken;
 import com.sossbar.oauth2.kakao.dto.KakaoUserInfo;
+import com.sossbar.oauth2.kakao.dto.LoginInfoResDto;
 import com.sossbar.user.entity.User;
 import com.sossbar.user.entity.UserType;
 import com.sossbar.user.repository.UserRepository;
@@ -104,7 +105,6 @@ public class KakaoLoginService {
         ).orElseGet(() ->
                 userRepository.save(User.builder()
                         .email(kakaoUserInfo.getKakaoAccount().getEmail())
-                        .nickname(kakaoUserInfo.getProperties().getNickname())
                         .profileImageUrl(
                                 kakaoUserInfo.getKakaoAccount()
                                         .getProfile()
@@ -115,5 +115,19 @@ public class KakaoLoginService {
         );
 
         return user;
+    }
+
+    // 테스트 계정 accessToken 발급
+    public LoginInfoResDto testLogin() {
+        User testUser = userRepository.findByEmail("test@sossbar.com")
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION
+                        , ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage()));
+
+        String accessToken = jwtTokenProvider.generateToken(testUser);
+
+        return new LoginInfoResDto(
+                accessToken,
+                testUser.getId()
+        );
     }
 }
