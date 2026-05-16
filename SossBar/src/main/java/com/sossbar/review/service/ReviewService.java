@@ -130,12 +130,12 @@ public class ReviewService {
         // 내가 내 전체 후기 조회
         if(userId.equals(loginUserId)) {
             return reviews.stream()
-                    .map(review -> (CommonReviewResDto) ReviewPrivateResDto.from(review))
-                    .toList();
+                    .map(ReviewPrivateResDto::from)
+                    .collect(Collectors.toList());
         }
         // 다른 사용자 전체 후기 조회
         return reviews.stream()
-                .map(review -> (CommonReviewResDto) ReviewPublicResDto.from(review))
-                .toList();
+                .map(ReviewPublicResDto::from)
+                .collect(Collectors.toList());
         }
 }
