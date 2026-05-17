@@ -64,4 +64,11 @@ public class ProjectController {
         projectFacade.deleteProject(projectId);
         return ApiResTemplate.successWithNoContent(SuccessCode.DELETE_SUCCESS);
     }
+
+    @Operation(summary = "팀원 추가", description = "프로젝트에 팀원을 추가하는 API입니다.")
+    @PostMapping("invite/{projectId}")
+    public ApiResTemplate<Void> inviteProjectMember(Principal principal, @PathVariable Long projectId) {
+        projectService.inviteProjectMember(principal, projectId);
+        return ApiResTemplate.successResponse(SuccessCode.CREATE_SUCCESS, null);
+    }
 }

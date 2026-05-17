@@ -61,7 +61,7 @@ public class ReviewService {
         User reviewer = userRepository.findById(reviewerIdentifier)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION, reviewerIdentifier+""));
         User reviewee = userRepository.findById(reviewReqDto.getRevieweeId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION, reviewerIdentifier+""));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION, reviewReqDto.getRevieweeId()+""));
 
         if (reviewRepository.existsByReviewerAndReviewee(reviewer, reviewee)) {
             throw new BusinessException(ErrorCode.DUPLICATE_REVIEW_EXCEPTION, reviewee.getId()+"");
@@ -106,7 +106,7 @@ public class ReviewService {
         Map<Long, SpectrumAxis> spectrumAxisMap = spectrumAxes.stream()
                         .collect(Collectors.toMap(SpectrumAxis::getSpectrumAxisId, axis -> axis));
 
-        if(spectrumAxisMap.size() != spectrumAxes.size()) {
+        if(spectrumAxisMap.size() != spectrumAxisIds.size()) {
             throw new BusinessException(ErrorCode.SPECTRUM_NOT_FOUND, "");
         }
 
