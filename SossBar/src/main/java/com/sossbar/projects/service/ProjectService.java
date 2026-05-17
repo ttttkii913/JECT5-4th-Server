@@ -124,4 +124,32 @@ public class ProjectService {
                 .members(memberResponses)
                 .build();
     }
+
+    @Transactional
+    public void inviteProjectMember(Principal principal, Long projectId) {
+        Long loginUserId = Long.parseLong(principal.getName());
+        User user = userRepository.findById(loginUserId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + loginUserId));
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
+
+        if(projectMemberRepository.existsByProjectAndUser(project, user)) {
+            throw new BusinessException(
+                    ErrorCode.PROJECT_MEMBER_ALREADY_EXISTS_EXCEPTION,
+                    ErrorCode.PROJECT_MEMBER_ALREADY_EXISTS_EXCEPTION.getMessage() + " (projectId: " + projectId + ", userId: " + loginUserId + ")");
+        }
+
+        ProjectMember projectMember = ProjectMember.builder()
+                .project(project)
+                .user(user)
+                .memberStatus(MemberStatus.MEMBER)
+                .build();
+
+        projectMemberRepository.save(projectMember);
+    }
 }

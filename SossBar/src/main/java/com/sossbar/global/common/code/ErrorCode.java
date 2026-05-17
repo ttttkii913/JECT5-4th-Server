@@ -41,6 +41,7 @@ public enum ErrorCode {
     PROJECT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 프로젝트가 없습니다. projectId = ", "PROJECT-001"),
     PROJECT_CREATE_ROLLBACK_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "프로젝트 생성 중 DB 오류가 발생하여 업로드된 이미지를 롤백했습니다. imageUrl = ", "PROJECT-002"),
     PROJECT_UPDATE_ROLLBACK_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "프로젝트 수정 중 DB 오류가 발생하여 업로드된 이미지를 롤백했습니다. imageUrl = ", "PROJECT-003"),
+    PROJECT_MEMBER_ALREADY_EXISTS_EXCEPTION(HttpStatus.CONFLICT, "이미 해당 프로젝트에 추가된 사용자입니다. userId = ", "PROJECT-004"),
 
     // REVIEW
     DUPLICATE_REVIEW_EXCEPTION(HttpStatus.CONFLICT,"이미 해당 사용자에게 후기를 남겼습니다. revieweeId = ","REVIEW-001"),
