@@ -76,6 +76,6 @@ public class ProjectController {
     @DeleteMapping("{projectId}/{userId}")
     public ApiResTemplate<Void> deleteProjectMember(Principal principal, @PathVariable Long projectId, @PathVariable Long userId) {
         projectService.deleteProjectMember(principal, projectId, userId);
-        return ApiResTemplate.successResponse(SuccessCode.DELETE_SUCCESS, null);
+        return ApiResTemplate.successWithNoContent(SuccessCode.DELETE_SUCCESS);
     }
 }

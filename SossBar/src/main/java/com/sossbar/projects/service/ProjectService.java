@@ -179,6 +179,12 @@ public class ProjectService {
                     ErrorCode.UNAUTHORIZED_MEMBER_DELETION_EXCEPTION.getMessage() + " (projectId: " + projectId + ", userId: " + loginUserId + ")");
         }
 
+        if(loginUserId.equals(userId)) {
+            throw new BusinessException(
+                    ErrorCode.UNAUTHORIZED_MEMBER_DELETION_EXCEPTION,
+                    "팀장은 스스로를 삭제할 수 없습니다. (projectId: " + projectId + ", userId: " + loginUserId + ")");
+        }
+
         User targetUser = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.USER_NOT_FOUND_EXCEPTION,
