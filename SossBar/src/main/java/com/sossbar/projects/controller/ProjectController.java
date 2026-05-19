@@ -71,4 +71,11 @@ public class ProjectController {
         projectService.inviteProjectMember(principal, projectId);
         return ApiResTemplate.successResponse(SuccessCode.CREATE_SUCCESS, null);
     }
+
+    @Operation(summary = "팀원 삭제", description = "프로젝트에서 팀원을 삭제하는 API입니다.")
+    @DeleteMapping("{projectId}/{userId}")
+    public ApiResTemplate<Void> deleteProjectMember(Principal principal, @PathVariable Long projectId, @PathVariable Long userId) {
+        projectService.deleteProjectMember(principal, projectId, userId);
+        return ApiResTemplate.successWithNoContent(SuccessCode.DELETE_SUCCESS);
+    }
 }

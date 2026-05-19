@@ -152,4 +152,49 @@ public class ProjectService {
 
         projectMemberRepository.save(projectMember);
     }
+
+    @Transactional
+    public void deleteProjectMember(Principal principal, Long projectId, Long userId) {
+        // 유저가 팀장인지 확인
+        Long loginUserId = Long.parseLong(principal.getName());
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
+
+        User loginUser = userRepository.findById(loginUserId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + loginUserId));
+
+        ProjectMember projectMember = projectMemberRepository.findByProjectAndUser(project, loginUser)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage() + " (projectId: " + projectId + ", userId: " + loginUserId + ")"));
+
+        if(projectMember.getMemberStatus() != MemberStatus.LEADER) {
+            throw new BusinessException(
+                    ErrorCode.UNAUTHORIZED_MEMBER_DELETION_EXCEPTION,
+                    ErrorCode.UNAUTHORIZED_MEMBER_DELETION_EXCEPTION.getMessage() + " (projectId: " + projectId + ", userId: " + loginUserId + ")");
+        }
+
+        if(loginUserId.equals(userId)) {
+            throw new BusinessException(
+                    ErrorCode.UNAUTHORIZED_MEMBER_DELETION_EXCEPTION,
+                    "팀장은 스스로를 삭제할 수 없습니다. (projectId: " + projectId + ", userId: " + loginUserId + ")");
+        }
+
+        User targetUser = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
+
+        ProjectMember targetMember = projectMemberRepository.findByProjectAndUser(project, targetUser)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage() + " (projectId: " + projectId + ", userId: " + userId + ")"));
+
+        projectMemberRepository.delete(targetMember);
+    }
 }
