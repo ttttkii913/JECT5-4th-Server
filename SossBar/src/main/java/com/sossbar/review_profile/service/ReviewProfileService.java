@@ -1,0 +1,59 @@
+package com.sossbar.review_profile.service;
+
+import com.sossbar.global.common.code.ErrorCode;
+import com.sossbar.global.common.exception.BusinessException;
+import com.sossbar.projects.entity.Project;
+import com.sossbar.projects.repository.ProjectRepository;
+import com.sossbar.review.repository.ReviewSpectrumRepository;
+import com.sossbar.review.repository.ReviewTagRepository;
+import com.sossbar.review_profile.dto.response.TagInfoResDto;
+import com.sossbar.review_profile.dto.response.TagListResDto;
+import com.sossbar.user.entity.User;
+import com.sossbar.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ReviewProfileService {
+
+    private final ReviewTagRepository reviewTagRepository;
+    private final ReviewSpectrumRepository reviewSpectrumRepository;
+    private final UserRepository userRepository;
+    private final ProjectRepository projectRepository;
+
+    // 1. 태그 전체 조회
+    public TagListResDto getAllTags(Long userId) {
+        User user = getUserById(userId);
+        List<TagInfoResDto> allTags = reviewTagRepository.findTagStatisticsByUser(user);
+
+        return TagListResDto.from(allTags);
+    }
+
+    // 2. 태그 프로젝트별 조회
+    public TagListResDto getTagsByProject(Long userId, Long projectId) {
+        User user = getUserById(userId);
+        Project project = getProjectById(projectId);
+
+        List<TagInfoResDto> allTags = reviewTagRepository.findTagStatisticsByUserAndProject(user, project);
+
+        return TagListResDto.from(allTags);
+    }
+
+    // entity 찾는 공통 메소드
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(
+                () -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
+    }
+
+    private Project getProjectById(Long projectId) {
+        return projectRepository.findById(projectId).orElseThrow(
+                () -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
+    }
+}
