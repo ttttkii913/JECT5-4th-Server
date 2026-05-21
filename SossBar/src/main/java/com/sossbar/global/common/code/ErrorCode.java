@@ -44,6 +44,8 @@ public enum ErrorCode {
     PROJECT_MEMBER_ALREADY_EXISTS_EXCEPTION(HttpStatus.CONFLICT, "이미 해당 프로젝트에 추가된 사용자입니다. userId = ", "PROJECT-004"),
     PROJECT_MEMBER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 프로젝트에 참여 중인 사용자가 아닙니다.", "PROJECT-005"),
     UNAUTHORIZED_MEMBER_DELETION_EXCEPTION(HttpStatus.FORBIDDEN, "팀장만 멤버를 삭제할 수 있습니다.", "PROJECT-006"),
+    UNAUTHORIZED_MEMBER_CONFIRMATION_EXCEPTION(HttpStatus.FORBIDDEN,"팀장만 팀 멤버를 확정할 수 있습니다.","PROJECT-007"),
+    INVALID_PROJECT_STATUS_EXCEPTION(HttpStatus.BAD_REQUEST,"현재 활성화된 프로젝트만 확정할 수 있습니다.","PROJECT-008"),
 
     // REVIEW
     DUPLICATE_REVIEW_EXCEPTION(HttpStatus.CONFLICT,"이미 해당 사용자에게 후기를 남겼습니다. revieweeId = ","REVIEW-001"),

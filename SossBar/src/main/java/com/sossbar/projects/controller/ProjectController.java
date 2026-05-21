@@ -78,4 +78,11 @@ public class ProjectController {
         projectService.deleteProjectMember(principal, projectId, userId);
         return ApiResTemplate.successWithNoContent(SuccessCode.DELETE_SUCCESS);
     }
+
+    @Operation(summary = "팀원 확정", description = "프로젝트 팀원을 확정하는 API입니다.")
+    @PatchMapping("confirm/{projectId}")
+    public ApiResTemplate<Void> confirmProjectMembers(Principal principal, @PathVariable Long projectId) {
+        projectService.confirmProjectMembers(principal, projectId);
+        return ApiResTemplate.successResponse(SuccessCode.UPDATE_SUCCESS, null);
+    }
 }

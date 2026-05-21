@@ -197,4 +197,38 @@ public class ProjectService {
 
         projectMemberRepository.delete(targetMember);
     }
+
+    @Transactional
+    public void confirmProjectMembers(Principal principal, Long projectId) {
+        Long loginUserId = Long.parseLong(principal.getName());
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
+
+        User loginUser = userRepository.findById(loginUserId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + loginUserId));
+
+        ProjectMember loginMember = projectMemberRepository.findByProjectAndUser(project, loginUser)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage() + " (projectId: " + projectId + ", userId: " + loginUserId + ")"));
+
+        if(loginMember.getMemberStatus() != MemberStatus.LEADER) {
+            throw new BusinessException(
+                    ErrorCode.UNAUTHORIZED_MEMBER_CONFIRMATION_EXCEPTION,
+                    ErrorCode.UNAUTHORIZED_MEMBER_CONFIRMATION_EXCEPTION.getMessage() + " (projectId: " + projectId + ", userId: " + loginUserId + ")");
+        }
+
+        if(project.getProjectStatus() != ProjectStatus.IN_PROGRESS) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_PROJECT_STATUS_EXCEPTION,
+                    ErrorCode.UNAUTHORIZED_MEMBER_CONFIRMATION_EXCEPTION.getMessage() + "(projectId: " + projectId + ", currentStatus: " + project.getProjectStatus() + ")");
+        }
+
+        project.updateProjectStatus(ProjectStatus.COMPLETED);
+    }
 }
