@@ -50,4 +50,9 @@ public class Project extends BaseTimeEntity {
         if (endDate != null) this.endDate = endDate;
         if (projectImage != null) this.projectImage = projectImage;
     }
+
+    // 프로젝트 상태 변경 메서드
+    public void updateProjectStatus(ProjectStatus projectStatus) {
+        this.projectStatus = projectStatus;
+    }
 }

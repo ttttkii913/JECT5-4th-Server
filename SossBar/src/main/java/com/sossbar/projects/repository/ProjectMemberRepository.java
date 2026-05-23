@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Long> {
 
@@ -24,4 +25,9 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     @Modifying
     @Query("delete from ProjectMember pm where pm.project = :project")
     void deleteAllByProject(@Param("project") Project project);
+
+    //중복 체크용
+    boolean existsByProjectAndUser(Project project, User user);
+
+    Optional<ProjectMember> findByProjectAndUser(Project project, User user);
 }
