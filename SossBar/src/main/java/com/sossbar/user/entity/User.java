@@ -27,6 +27,9 @@ public class User extends BaseTimeEntity {
     private UserType userType;
     private String refreshToken;
 
+    @Column(name = "user_info_delete")
+    private boolean isDeleted = false;
+
     @Builder
     public User(String username, String email, String bio, String profileImageUrl, UserType userType, String refreshToken) {
         this.username = username;
@@ -55,4 +58,13 @@ public class User extends BaseTimeEntity {
         this.refreshToken = refreshToken;
     }
 
+    public void deleteUser() {
+        this.username = "탈퇴한 회원";
+        this.email = "deleted_user" + this.id;
+        this.bio = null;
+        this.profileImageUrl = null;
+        this.userType = null;
+        this.refreshToken = null;
+        this.isDeleted = true;
+    }
 }

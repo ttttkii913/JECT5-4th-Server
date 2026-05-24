@@ -3,6 +3,11 @@ package com.sossbar.user.service;
 import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.global.config.S3Service;
+import com.sossbar.projects.entity.Project;
+import com.sossbar.projects.entity.ProjectMember;
+import com.sossbar.projects.enums.MemberStatus;
+import com.sossbar.projects.repository.ProjectMemberRepository;
+import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
 import com.sossbar.user.dto.response.UserInfoResDto;
 import com.sossbar.user.entity.User;
@@ -13,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +28,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final S3Service s3Service;
+    private final ProjectMemberRepository projectMemberRepository;
+    private final ProjectRepository projectRepository;
 
     // 온보딩 - 사용자 추가 정보 입력 (실명, 한 줄 소개, 프로필 이미지)
     @Transactional
@@ -55,9 +64,54 @@ public class UserService {
         return UserInfoResDto.from(user);
     }
 
+    // 회원 탈퇴 - soft delete
+    @Transactional
+    public void deleteUser(Principal principal) {
+        Long id = Long.parseLong(principal.getName());
+        User user = getUserById(id);
+
+        // 프로젝트 처리
+        // 사용자가 속한 프로젝트 목록
+        List<ProjectMember> memberships = projectMemberRepository.findAllByUser(user);
+
+        // 현재 사용자가 리더인지 확인 후 프로젝트 참여일이 가장 빠른 팀원에게 권한 위임
+        for (ProjectMember membership : memberships) {
+            Project project = membership.getProject();
+            boolean isLeader = membership.getMemberStatus() == MemberStatus.LEADER;
+
+            // 리더인 경우 권한 위임
+            if (isLeader) {
+                // 남은 팀원
+                List<ProjectMember> remainMembers =
+                        projectMemberRepository.findAllByProject(project)
+                                .stream()
+                                .filter(pm -> !pm.getUser().getId().equals(user.getId()))
+                                .sorted(Comparator.comparing(ProjectMember::getCreatedAt))
+                                .toList();
+
+                // 남은 팀원이 없으면 프로젝트 삭제
+                if (remainMembers.isEmpty()) {
+                    projectMemberRepository.deleteAllByProject(project);
+                    projectRepository.delete(project);
+                    continue;
+                }
+
+                // 가장 먼저 참여한 팀원
+                ProjectMember nextLeader = remainMembers.get(0);
+
+                // 리더 권한 위임
+                nextLeader.changeMemberStatus(MemberStatus.LEADER);
+            }
+
+            projectMemberRepository.delete(membership);
+        }
+
+        user.deleteUser();
+    }
+
     // entity 찾는 공통 메소드
     private User getUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(
+        return userRepository.findByIdAndIsDeletedFalse(userId).orElseThrow(
                 () -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION
                         , ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
     }
