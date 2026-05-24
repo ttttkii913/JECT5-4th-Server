@@ -13,9 +13,10 @@ public record SpectrumInfoResDto(
         // 오른쪽 성향 인원 수(강도 4~6)
         Long rightStrengthCount
 ) {
-/*    //TODO: 평균값 반올림 처리
-    // 소수점 2.81 -> 2.8
-    public SpectrumInfoResDto {
-        averageStrength = Math.round(averageStrength * 10) / 10.0;
-    }*/
+    // 2.85 -> 3, 2.35 -> 2
+    public Integer getAverageStrength() {
+        return averageStrength != null
+                ? (int) Math.round(averageStrength)
+                : null;
+    }
 }
