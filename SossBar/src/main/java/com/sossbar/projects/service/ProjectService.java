@@ -14,6 +14,7 @@ import com.sossbar.projects.enums.MemberStatus;
 import com.sossbar.projects.enums.ProjectStatus;
 import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.projects.repository.ProjectRepository;
+import com.sossbar.review.repository.ReviewRepository;
 import com.sossbar.user.entity.User;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,7 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public ProjectResponse createProject(Principal principal, ProjectCreateRequest request, String imageUrl) {
@@ -95,7 +98,7 @@ public class ProjectService {
                             .stream()
                             .filter(m -> !m.getUser().getId().equals(userId))
                             .toList();
-                    return toMyResponse(pm, otherMembers);
+                    return toMyResponse(pm, otherMembers, userId);
                 })
                 .toList();
     }
@@ -174,9 +177,9 @@ public class ProjectService {
     }
 
     // ProjectMember(나) + 나를 제외한 멤버 → MyProjectResponse 변환
-    private MyProjectResponse toMyResponse(ProjectMember myMembership, List<ProjectMember> otherMembers) {
+    private MyProjectResponse toMyResponse(ProjectMember myMembership, List<ProjectMember> otherMembers, Long loginUserId) {
         Project project = myMembership.getProject();
-        List<ProjectMemberResponse> memberResponses = toMemberResponses(otherMembers);
+        List<ProjectMemberResponse> memberResponses = toMyMemberResponses(otherMembers, loginUserId);
 
         return MyProjectResponse.builder()
                 .projectId(project.getProjectId())
@@ -213,6 +216,21 @@ public class ProjectService {
                         .username(pm.getUser().getUsername())
                         .profileImageUrl(pm.getUser().getProfileImageUrl())
                         .memberStatus(pm.getMemberStatus())
+                        .build())
+                .toList();
+    }
+
+    private List<ProjectMemberResponse> toMyMemberResponses(List<ProjectMember> members, Long loginUserId) {
+        Set<Long> reviewedUserIds = reviewRepository.findRevieweeIdsByReviewerId(loginUserId);
+
+        return members.stream()
+                .map(pm -> ProjectMemberResponse.builder()
+                        .projectMemberId(pm.getProjectMemberId())
+                        .userId(pm.getUser().getId())
+                        .username(pm.getUser().getUsername())
+                        .profileImageUrl(pm.getUser().getProfileImageUrl())
+                        .memberStatus(pm.getMemberStatus())
+                        .reviewWritten(reviewedUserIds.contains(pm.getUser().getId()))
                         .build())
                 .toList();
     }
