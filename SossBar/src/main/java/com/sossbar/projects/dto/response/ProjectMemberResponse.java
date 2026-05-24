@@ -13,5 +13,5 @@ public class ProjectMemberResponse {
     private String username;
     private String profileImageUrl;
     private MemberStatus memberStatus;
-    private boolean reviewWritten;
+    private Boolean reviewWritten;
 }
