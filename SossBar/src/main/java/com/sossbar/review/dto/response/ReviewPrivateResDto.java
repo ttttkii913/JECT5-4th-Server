@@ -2,8 +2,10 @@ package com.sossbar.review.dto.response;
 
 import com.sossbar.review.entity.Review;
 import lombok.Builder;
+import lombok.Getter;
 
 // 내 프로필 전체 후기 조회
+@Getter
 @Builder
 public class ReviewPrivateResDto extends CommonReviewResDto {
     private String projectName;
