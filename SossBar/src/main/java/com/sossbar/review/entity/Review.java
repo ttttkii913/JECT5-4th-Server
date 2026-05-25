@@ -1,17 +1,17 @@
 package com.sossbar.review.entity;
 
+import com.sossbar.global.common.template.BaseTimeEntity;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Review {
+public class Review extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
