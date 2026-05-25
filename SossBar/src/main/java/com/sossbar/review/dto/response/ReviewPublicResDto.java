@@ -13,10 +13,14 @@ public class ReviewPublicResDto extends CommonReviewResDto {
     private String positiveFeedback;
 
     public static ReviewPublicResDto from(Review review) {
-        return ReviewPublicResDto.builder()
+        ReviewPublicResDto dto = ReviewPublicResDto.builder()
                 .projectName(review.getProject().getProjectName())
                 .host(review.getProject().getHost())
                 .positiveFeedback(review.getPositiveFeedback())
                 .build();
+        dto.reviewId = review.getReviewId();
+        dto.projectImage = review.getProject().getProjectImage();
+        dto.createdAt = review.getCreatedAt();
+        return dto;
     }
 }
