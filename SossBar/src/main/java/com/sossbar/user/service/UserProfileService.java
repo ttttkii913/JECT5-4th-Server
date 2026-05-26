@@ -55,7 +55,7 @@ public class UserProfileService {
 
     // entity 찾는 공통 메소드
     private User getUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(
+        return userRepository.findByIdAndIsDeletedFalse(userId).orElseThrow(
                 () -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION
                         , ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
     }

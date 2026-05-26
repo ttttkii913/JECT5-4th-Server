@@ -55,4 +55,9 @@ public class Project extends BaseTimeEntity {
     public void updateProjectStatus(ProjectStatus projectStatus) {
         this.projectStatus = projectStatus;
     }
+
+    // 프로젝트 상태 변경(삭제)
+    public void deleteProject() {
+        this.projectStatus = ProjectStatus.DELETED;
+    }
 }

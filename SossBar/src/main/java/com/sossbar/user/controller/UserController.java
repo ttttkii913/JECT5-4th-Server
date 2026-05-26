@@ -43,4 +43,12 @@ public class UserController {
         UserInfoResDto userInfoResDto = userService.getUserInfo(principal);
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, userInfoResDto);
     }
+
+    @Operation(summary = "회원 탈퇴", description = "로그인한 사용자가 회원 탈퇴를 통해 자신의 정보를 삭제합니다." +
+            "<br> 해당 사용자가 작성한 후기는 삭제되지 않으며, userId로 판별하는 api에서 탈퇴한 사용자로 조회시 notfound 예외")
+    @DeleteMapping
+    public ApiResTemplate<String> deleteUser(Principal principal) {
+        userService.deleteUser(principal);
+        return ApiResTemplate.successWithNoContent(SuccessCode.DELETE_SUCCESS);
+    }
 }

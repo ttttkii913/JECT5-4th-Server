@@ -58,9 +58,9 @@ public class ReviewService {
             throw new IllegalArgumentException(e);
         }
 
-        User reviewer = userRepository.findById(reviewerIdentifier)
+        User reviewer = userRepository.findByIdAndIsDeletedFalse(reviewerIdentifier)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION, reviewerIdentifier+""));
-        User reviewee = userRepository.findById(reviewReqDto.getRevieweeId())
+        User reviewee = userRepository.findByIdAndIsDeletedFalse(reviewReqDto.getRevieweeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION, reviewReqDto.getRevieweeId()+""));
 
         if (reviewRepository.existsByReviewerAndReviewee(reviewer, reviewee)) {
@@ -71,7 +71,7 @@ public class ReviewService {
             throw new BusinessException(ErrorCode.SELF_REVIEW_NOT_ALLOWED, "");
         }
 
-        Project project = projectRepository.findById(reviewReqDto.getProjectId())
+        Project project = projectRepository.findActiveProjectById(reviewReqDto.getProjectId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND_EXCEPTION, reviewReqDto.getProjectId()+""));
 
         Review savedReview = reviewRepository.save(reviewReqDto.toEntity(reviewer, reviewee, project));
