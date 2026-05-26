@@ -36,7 +36,7 @@ public enum ErrorCode {
 
     // USER
     USER_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 사용자가 없습니다. userId = ", "USER-001"),
-    INVALID_USER_DELETE_EXCEPTION(HttpStatus.NOT_FOUND, "기타를 선택할 경우 사유를 입력해야 합니다. userId = ", "USER-002"),
+    INVALID_USER_DELETE_EXCEPTION(HttpStatus.BAD_REQUEST, "기타를 선택할 경우 사유를 입력해야 합니다. userId = ", "USER-002"),
 
     // PROJECT
     PROJECT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "해당 프로젝트가 없습니다. projectId = ", "PROJECT-001"),

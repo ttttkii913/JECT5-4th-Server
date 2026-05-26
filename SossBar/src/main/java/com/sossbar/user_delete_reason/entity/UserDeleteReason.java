@@ -17,6 +17,7 @@ public class UserDeleteReason {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private UserDeleteReasonEnum userDeleteReasonEnum;
 
     private String detail;
