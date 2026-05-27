@@ -42,6 +42,7 @@ public class UserProfileService {
         }
 
         user.updateUserInfo(userInfoUpdateReqDto, newProfileImageUrl);
+        user.updateMarketingAgree(userInfoUpdateReqDto.marketingAgree());
 
         return UserInfoResDto.from(user);
     }

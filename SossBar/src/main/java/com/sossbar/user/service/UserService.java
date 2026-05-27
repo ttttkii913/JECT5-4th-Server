@@ -47,6 +47,14 @@ public class UserService {
             );
         }
 
+        // 필수 약관 동의 여부 확인
+        if (!userInfoUpdateReqDto.requiredAgree()) {
+            throw new BusinessException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "필수 약관 동의가 필요합니다."
+            );
+        }
+
         // 아무것도 보내지 않으면 초기 이미지는 null로
         String profileImageUrl = null;
         if (profileImage != null && !profileImage.isEmpty()) {
@@ -54,6 +62,9 @@ public class UserService {
         }
 
         user.updateUserInfo(userInfoUpdateReqDto, profileImageUrl);
+
+        // 마케팅 동의 여부 저장
+        user.updateMarketingAgree(userInfoUpdateReqDto.marketingAgree());
 
         return UserInfoResDto.from(user);
     }
