@@ -7,11 +7,14 @@ import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.projects.enums.MemberStatus;
 import com.sossbar.projects.repository.ProjectMemberRepository;
-import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
 import com.sossbar.user.dto.response.UserInfoResDto;
 import com.sossbar.user.entity.User;
 import com.sossbar.user.repository.UserRepository;
+import com.sossbar.user_delete_reason.dto.request.UserDeleteReqDto;
+import com.sossbar.user_delete_reason.entity.UserDeleteReasonEnum;
+import com.sossbar.user_delete_reason.entity.UserDeleteReason;
+import com.sossbar.user_delete_reason.repository.UserDeleteReasonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +31,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
     private final ProjectMemberRepository projectMemberRepository;
-    private final ProjectRepository projectRepository;
+    private final UserDeleteReasonRepository userDeleteReasonLogRepository;
 
     // 온보딩 - 사용자 추가 정보 입력 (실명, 한 줄 소개, 프로필 이미지)
     @Transactional
@@ -65,9 +68,20 @@ public class UserService {
 
     // 회원 탈퇴 - soft delete
     @Transactional
-    public void deleteUser(Principal principal) {
+    public void deleteUser(Principal principal, UserDeleteReqDto reqDto) {
         Long id = Long.parseLong(principal.getName());
         User user = getUserById(id);
+
+        // 기타 선택 + 상세 내용 입력이 없는 경우 예외
+        if (reqDto.userDeleteReasonEnum() == UserDeleteReasonEnum.ETC
+                && (reqDto.detail() == null || reqDto.detail().isBlank())) {
+            throw new BusinessException(ErrorCode.INVALID_USER_DELETE_EXCEPTION,
+                    ErrorCode.INVALID_USER_DELETE_EXCEPTION.getMessage() + id);
+        }
+
+        // 탈퇴 사유 저장
+        UserDeleteReason reason = new UserDeleteReason(reqDto.userDeleteReasonEnum(), reqDto.detail());
+        userDeleteReasonLogRepository.save(reason);
 
         // 프로젝트 처리
         // 사용자가 속한 프로젝트 목록
