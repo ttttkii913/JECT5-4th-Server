@@ -28,4 +28,5 @@ public class MyProjectResponse {
     private ProjectStatus projectStatus;
     private MemberStatus myMemberStatus;
     private List<ProjectMemberResponse> members;
+    private int memberCount;
 }

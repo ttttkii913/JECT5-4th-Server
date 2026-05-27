@@ -24,4 +24,5 @@ public class ProjectResponse {
     private String projectImage;
     private ProjectStatus projectStatus;
     private List<ProjectMemberResponse> members;
+    private int memberCount;
 }
