@@ -99,13 +99,14 @@ public class ProjectService {
         // 3. 각 Project의 전체 멤버 조회 후 나를 제외하고 MyProjectResponse로 변환
         return myMemberships.stream()
                 .map(pm -> {
-                    List<ProjectMember> otherMembers = membersByProject
-                            .getOrDefault(pm.getProject().getProjectId(), List.of())
+                    List<ProjectMember> allProjectMembers = membersByProject
+                            .getOrDefault(pm.getProject().getProjectId(), List.of());
+                    List<ProjectMember> otherMembers = allProjectMembers
                             .stream()
                             .filter(m -> !m.getUser().getId().equals(userId))
                             .toList();
                     Set<Long> reviewedUserIds = reviewedUserIdsByProject.getOrDefault(pm.getProject().getProjectId(), Set.of());
-                    return toMyResponse(pm, otherMembers, reviewedUserIds);
+                    return toMyResponse(pm, otherMembers, reviewedUserIds, allProjectMembers.size());
                 })
                 .toList();
     }
@@ -180,11 +181,12 @@ public class ProjectService {
                 .projectImage(project.getProjectImage())
                 .projectStatus(project.getProjectStatus())
                 .members(memberResponses)
+                .memberCount(memberResponses.size())
                 .build();
     }
 
     // ProjectMember(나) + 나를 제외한 멤버 → MyProjectResponse 변환
-    private MyProjectResponse toMyResponse(ProjectMember myMembership, List<ProjectMember> otherMembers, Set<Long> reviewedUserIds) {
+    private MyProjectResponse toMyResponse(ProjectMember myMembership, List<ProjectMember> otherMembers, Set<Long> reviewedUserIds, int memberCount) {
         Project project = myMembership.getProject();
         List<ProjectMemberResponse> memberResponses = toMyMemberResponses(otherMembers, reviewedUserIds);
 
@@ -199,6 +201,7 @@ public class ProjectService {
                 .projectStatus(project.getProjectStatus())
                 .myMemberStatus(myMembership.getMemberStatus())
                 .members(memberResponses)
+                .memberCount(memberCount)
                 .build();
     }
 
