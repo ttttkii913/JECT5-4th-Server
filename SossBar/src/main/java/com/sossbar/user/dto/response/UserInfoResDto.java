@@ -11,7 +11,9 @@ public record UserInfoResDto(
         String email,
         String bio,
         String profileImageUrl,
-        UserType userType
+        UserType userType,
+        boolean marketingAgree
+
 ) {
     public static UserInfoResDto from(User user) {
         return UserInfoResDto.builder()
@@ -21,6 +23,7 @@ public record UserInfoResDto(
                 .bio(user.getBio())
                 .profileImageUrl(user.getProfileImageUrl())
                 .userType(user.getUserType())
+                .marketingAgree(user.isMarketingAgree())
                 .build();
     }
 }

@@ -13,13 +13,13 @@ import java.util.Optional;
 
 public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Long> {
 
-    @Query("select pm from ProjectMember pm join fetch pm.user where pm.project = :project")
+    @Query("select pm from ProjectMember pm join fetch pm.user u where pm.project = :project and u.isDeleted = false")
     List<ProjectMember> findAllByProject(@Param("project") Project project);
 
-    @Query("select pm from ProjectMember pm join fetch pm.project where pm.user = :user")
+    @Query("select pm from ProjectMember pm join fetch pm.project where pm.user = :user  and pm.user.isDeleted = false")
     List<ProjectMember> findAllByUser(@Param("user") User user);
 
-    @Query("select pm from ProjectMember pm join fetch pm.user where pm.project in :projects")
+    @Query("select pm from ProjectMember pm join fetch pm.user u where pm.project in :projects and u.isDeleted = false")
     List<ProjectMember> findAllByProjects(@Param("projects") List<Project> projects);
 
     @Modifying
@@ -30,4 +30,6 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     boolean existsByProjectAndUser(Project project, User user);
 
     Optional<ProjectMember> findByProjectAndUser(Project project, User user);
+
+    Optional<ProjectMember> findFirstByProjectAndUser_IdNotOrderByCreatedAtAsc(Project project, Long userId);
 }

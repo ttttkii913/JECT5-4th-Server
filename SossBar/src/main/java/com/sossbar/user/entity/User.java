@@ -27,14 +27,20 @@ public class User extends BaseTimeEntity {
     private UserType userType;
     private String refreshToken;
 
+    @Column(name = "user_info_delete")
+    private boolean isDeleted = false;
+
+    private boolean marketingAgree = false;
+
     @Builder
-    public User(String username, String email, String bio, String profileImageUrl, UserType userType, String refreshToken) {
+    public User(String username, String email, String bio, String profileImageUrl, UserType userType, String refreshToken, boolean marketingAgree) {
         this.username = username;
         this.email = email;
         this.bio = bio;
         this.profileImageUrl = profileImageUrl;
         this.userType = userType;
         this.refreshToken = refreshToken;
+        this.marketingAgree = marketingAgree;
     }
 
     public void updateUserInfo(UserInfoUpdateReqDto userInfoUpdateReqDto, String profileImageUrl) {
@@ -55,4 +61,17 @@ public class User extends BaseTimeEntity {
         this.refreshToken = refreshToken;
     }
 
+    public void deleteUser() {
+        this.username = "탈퇴한 회원";
+        this.email = "deleted_user" + this.id;
+        this.bio = null;
+        this.profileImageUrl = null;
+        this.userType = null;
+        this.refreshToken = null;
+        this.isDeleted = true;
+    }
+
+    public void updateMarketingAgree(boolean marketingAgree) {
+        this.marketingAgree = marketingAgree;
+    }
 }

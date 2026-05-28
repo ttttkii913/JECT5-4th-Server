@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
@@ -25,4 +26,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
         """)
     List<Review> findAllByRevieweeId(@Param("userId") Long userId);
 
+    @Query("SELECT r.reviewee.id FROM Review r WHERE r.reviewer.id = :reviewerId AND r.project.id = :projectId")
+    Set<Long> findRevieweeIdsByReviewerIdAndProjectId(@Param("reviewerId") Long reviewerId, @Param("projectId") Long projectId);
+
+    @Query("SELECT r FROM Review r JOIN FETCH r.project WHERE r.reviewee.id = :userId AND r.project.id = :projectId")
+    List<Review> findAllByRevieweeIdAndProjectProjectId(@Param("userId")  Long userId, @Param("projectId") Long projectId);
 }

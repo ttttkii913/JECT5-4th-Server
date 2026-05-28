@@ -69,13 +69,13 @@ public class ReviewProfileService {
 
     // entity 찾는 공통 메소드
     private User getUserById(Long userId) {
-        return userRepository.findById(userId).orElseThrow(
+        return userRepository.findByIdAndIsDeletedFalse(userId).orElseThrow(
                 () -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
     }
 
     private Project getProjectById(Long projectId) {
-        return projectRepository.findById(projectId).orElseThrow(
+        return projectRepository.findActiveProjectById(projectId).orElseThrow(
                 () -> new BusinessException(ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
     }

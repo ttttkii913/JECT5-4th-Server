@@ -6,6 +6,7 @@ import com.sossbar.global.common.template.SwaggerApiResTemplate;
 import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
 import com.sossbar.user.dto.response.UserInfoResDto;
 import com.sossbar.user.service.UserService;
+import com.sossbar.user_delete_reason.dto.request.UserDeleteReqDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -42,5 +43,14 @@ public class UserController {
     public ApiResTemplate<UserInfoResDto> getUserInfo(Principal principal) {
         UserInfoResDto userInfoResDto = userService.getUserInfo(principal);
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, userInfoResDto);
+    }
+
+    @Operation(summary = "회원 탈퇴", description = "로그인한 사용자가 회원 탈퇴를 통해 자신의 정보를 삭제합니다." +
+            "<br> 탈퇴 사유를 선택(enum 값 + detail: null) or 기타(ETC) 선택시 탈퇴 사유(detail)을 입력해야 합니다." +
+            "<br> 해당 사용자가 작성한 후기는 삭제되지 않으며, userId로 판별하는 api에서 탈퇴한 사용자로 조회시 notfound 예외")
+    @DeleteMapping
+    public ApiResTemplate<String> deleteUser(Principal principal, @Valid @RequestBody UserDeleteReqDto userDeleteReqDto) {
+        userService.deleteUser(principal, userDeleteReqDto);
+        return ApiResTemplate.successWithNoContent(SuccessCode.DELETE_SUCCESS);
     }
 }

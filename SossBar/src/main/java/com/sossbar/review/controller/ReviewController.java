@@ -43,4 +43,15 @@ public class ReviewController {
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, reviews);
     }
 
+    @Operation(summary = "프로젝트별 후기 조회", description = "특정 프로젝트에 대한 후기를 조회할 수 있습니다.")
+    @GetMapping("/api/v1/users/{userId}/projects/{projectId}/reviews")
+    public ApiResTemplate<List<CommonReviewResDto>> getReviewsByProject(
+            Principal principal,
+            @PathVariable Long userId,
+            @PathVariable Long projectId
+    ) {
+        List<CommonReviewResDto> reviews = reviewService.getReviewsByProject(principal, userId, projectId);
+        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, reviews);
+    }
+
 }
