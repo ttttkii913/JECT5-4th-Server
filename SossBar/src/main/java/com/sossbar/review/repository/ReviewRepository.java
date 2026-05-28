@@ -29,4 +29,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT r.reviewee.id FROM Review r WHERE r.reviewer.id = :reviewerId AND r.project.id = :projectId")
     Set<Long> findRevieweeIdsByReviewerIdAndProjectId(@Param("reviewerId") Long reviewerId, @Param("projectId") Long projectId);
 
+    @Query("SELECT r FROM Review r JOIN FETCH r.project WHERE r.reviewee.ID = :userId AND r.project.projectId = :projectId")
+    List<Review> findAllByRevieweeIdAndProjectProjectId(Long userId, Long projectId);
 }

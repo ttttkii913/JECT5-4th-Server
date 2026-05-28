@@ -123,12 +123,13 @@ public class ReviewService {
         return ReviewCreateResDto.from(savedReview, reviewTags, reviewSpectrums);
     }
 
+    // 전체 후기 조회
     public List<CommonReviewResDto> getReviews(Principal principal, Long userId) {
         Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
         List<Review> reviews = reviewRepository.findAllByRevieweeId(userId);
 
         // 내가 내 전체 후기 조회
-        if(userId.equals(loginUserId)) {
+        if (userId.equals(loginUserId)) {
             return reviews.stream()
                     .map(ReviewPrivateResDto::from)
                     .collect(Collectors.toList());
@@ -137,5 +138,22 @@ public class ReviewService {
         return reviews.stream()
                 .map(ReviewPublicResDto::from)
                 .collect(Collectors.toList());
+    }
+
+    // 프로젝트별 후기 조회
+    public List<CommonReviewResDto> getReviewsByProject(Principal principal, Long userId, Long projectId) {
+        Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
+        List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(userId, projectId);
+
+        // 내 프로젝트별 후기 조회
+        if(userId.equals(loginUserId)) {
+            return reviews.stream()
+                    .map(ReviewPrivateResDto::from)
+                    .collect(Collectors.toList());
         }
+        // 다른 사용자 프로젝트별 후기 조회
+        return reviews.stream()
+                .map(ReviewPublicResDto::from)
+                .collect(Collectors.toList());
+    }
 }
