@@ -15,11 +15,9 @@ public class ProjectResponse {
     private Long projectId;
     private String projectName;
     private String host;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime startDate;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime endDate;
+    private LocalDateTime startDate;
     private String projectLink;
     private String projectImage;
     private ProjectStatus projectStatus;
