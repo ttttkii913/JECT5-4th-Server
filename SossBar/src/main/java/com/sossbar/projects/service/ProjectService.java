@@ -52,8 +52,6 @@ public class ProjectService {
         Project project = Project.builder()
                 .projectName(request.getProjectName())
                 .host(request.getHost())
-                .startDate(request.getStartDate())
-                .endDate(request.getEndDate())
                 .projectLink(projectLink)
                 .projectImage(imageUrl)
                 .projectStatus(ProjectStatus.IN_PROGRESS)
@@ -140,8 +138,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse updateProject(Long projectId, ProjectUpdateRequest request, String newImageUrl) {
         Project project = findProjectById(projectId);
-        project.update(request.getProjectName(), request.getHost(),
-                request.getStartDate(), request.getEndDate(), newImageUrl);
+        project.update(request.getProjectName(), request.getHost(), newImageUrl);
         List<ProjectMember> members = projectMemberRepository.findAllByProject(project);
         return toResponse(project, members);
     }
@@ -175,8 +172,7 @@ public class ProjectService {
                 .projectId(project.getProjectId())
                 .projectName(project.getProjectName())
                 .host(project.getHost())
-                .startDate(project.getStartDate())
-                .endDate(project.getEndDate())
+                .startDate(project.getCreatedAt())
                 .projectLink(project.getProjectLink())
                 .projectImage(project.getProjectImage())
                 .projectStatus(project.getProjectStatus())
@@ -194,8 +190,7 @@ public class ProjectService {
                 .projectId(project.getProjectId())
                 .projectName(project.getProjectName())
                 .host(project.getHost())
-                .startDate(project.getStartDate())
-                .endDate(project.getEndDate())
+                .startDate(project.getCreatedAt())
                 .projectLink(project.getProjectLink())
                 .projectImage(project.getProjectImage())
                 .projectStatus(project.getProjectStatus())
@@ -211,8 +206,7 @@ public class ProjectService {
                 .projectId(project.getProjectId())
                 .projectName(project.getProjectName())
                 .host(project.getHost())
-                .startDate(project.getStartDate())
-                .endDate(project.getEndDate())
+                .startDate(project.getCreatedAt())
                 .projectImage(project.getProjectImage())
                 .build();
     }

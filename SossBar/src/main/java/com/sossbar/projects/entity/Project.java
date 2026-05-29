@@ -32,22 +32,14 @@ public class Project extends BaseTimeEntity {
     @Column(name = "project_image")
     private String projectImage;         // 이미지 (S3 url)
 
-    @Column(name = "start_date")
-    private LocalDateTime startDate;     // 프로젝트 시작 날짜
-
-    @Column(name = "end_date")
-    private LocalDateTime endDate;       // 프로젝트 종료 날짜
-
     @Enumerated(EnumType.STRING)
     @Column(name = "project_status", nullable = false)
     private ProjectStatus projectStatus; // 프로젝트 진행 상황
 
     // 프로젝트 수정 메서드
-    public void update(String projectName, String host, LocalDateTime startDate, LocalDateTime endDate, String projectImage) {
+    public void update(String projectName, String host, String projectImage) {
         if (projectName != null) this.projectName = projectName;
         if (host != null) this.host = host;
-        if (startDate != null) this.startDate = startDate;
-        if (endDate != null) this.endDate = endDate;
         if (projectImage != null) this.projectImage = projectImage;
     }
 

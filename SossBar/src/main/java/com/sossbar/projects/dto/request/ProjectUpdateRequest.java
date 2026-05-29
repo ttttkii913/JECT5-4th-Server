@@ -18,13 +18,5 @@ public class ProjectUpdateRequest {
     @Schema(description = "주최사", example = "멋쟁이사자처럼")
     private String host;
 
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Schema(description = "프로젝트 시작 날짜", example = "2025-01-01T00:00:00")
-    private LocalDateTime startDate;
-
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    @Schema(description = "프로젝트 종료 날짜", example = "2025-12-31T23:59:59")
-    private LocalDateTime endDate;
-
     // 이미지는 MultipartFile로 별도 수신 (Controller의 @RequestPart("image") 참고)
 }
