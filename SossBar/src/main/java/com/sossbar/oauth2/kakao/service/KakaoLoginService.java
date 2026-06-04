@@ -3,7 +3,7 @@ package com.sossbar.oauth2.kakao.service;
 import com.google.gson.Gson;
 import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
-import com.sossbar.oauth2.jwt.JwtTokenProvider;
+import com.sossbar.global.common.template.ApiResTemplate;
 import com.sossbar.oauth2.kakao.dto.KakaoToken;
 import com.sossbar.oauth2.kakao.dto.KakaoUserInfo;
 import com.sossbar.oauth2.kakao.dto.LoginInfoResDto;
@@ -29,7 +29,7 @@ public class KakaoLoginService {
     private String KAKAO_REDIRECT_URI;
 
     private final UserRepository userRepository;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
 
     private static final String KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
 
@@ -118,16 +118,11 @@ public class KakaoLoginService {
     }
 
     // 테스트 계정 accessToken 발급
-    public LoginInfoResDto testLogin() {
+    public ResponseEntity<ApiResTemplate<LoginInfoResDto>> testLogin() {
         User testUser = userRepository.findByEmail("test@sossbar.com")
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION
                         , ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage()));
 
-        String accessToken = jwtTokenProvider.generateToken(testUser);
-
-        return new LoginInfoResDto(
-                accessToken,
-                testUser.getId()
-        );
+        return refreshTokenService.loginSuccess(testUser);
     }
 }

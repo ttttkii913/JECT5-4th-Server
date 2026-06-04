@@ -16,6 +16,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -40,6 +42,15 @@ public class RefreshTokenService {
         user.saveRefreshToken(refreshToken);
         userRepository.save(user);
 
+        // HttpOnly 쿠키로 accessToken 전달
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(Duration.ofDays(1))
+                .sameSite(cookieSameSite)
+                .build();
+
         // HttpOnly 쿠키로 refreshToken 전달
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
@@ -52,15 +63,20 @@ public class RefreshTokenService {
         System.out.println("cookieSecure = " + cookieSecure);
         System.out.println("cookieSameSite = " + cookieSameSite);
 
-        LoginInfoResDto loginInfoResDto = new LoginInfoResDto(accessToken, user.getId());
+        LoginInfoResDto loginInfoResDto = new LoginInfoResDto(user.getId());
+
+        // 헤더에 쿠키 세팅
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .headers(headers)
                 .body(ApiResTemplate.successResponse(SuccessCode.SUCCESS, loginInfoResDto));
     }
 
     // accessToken 재발급
-    public ApiResTemplate<LoginInfoResDto> getAccessTokenByRefreshToken(String refreshToken) {
+    public ResponseEntity<ApiResTemplate<LoginInfoResDto>> getAccessTokenByRefreshToken(String refreshToken) {
 
         // 토큰 유효성 검사
         if (!jwtTokenProvider.validateToken(refreshToken)) {
@@ -86,10 +102,19 @@ public class RefreshTokenService {
         // 새로운 accessToken 발급
         String newAccessToken = jwtTokenProvider.generateToken(user);
 
-        LoginInfoResDto loginInfoResDto = new LoginInfoResDto(
-                newAccessToken
-                , user.getId());
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(Duration.ofDays(1))
+                .sameSite(cookieSameSite)
+                .build();
 
-        return ApiResTemplate.successResponse(SuccessCode.SUCCESS, loginInfoResDto);
+        LoginInfoResDto loginInfoResDto = new LoginInfoResDto(user.getId());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .body(ApiResTemplate.successResponse(SuccessCode.SUCCESS, loginInfoResDto));
+
     }
 }
