@@ -34,7 +34,7 @@ public class KakaoLoginController {
 
     @Operation(summary = "리프레시 토큰으로 액세스 토큰 재발급", description = "HttpOnly 쿠키에 있는 refreshToken으로 accessToken을 재발급합니다.")
     @PostMapping("/reissue")
-    public ApiResTemplate<LoginInfoResDto> getAccessTokenByRefreshToken(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
+    public ResponseEntity<ApiResTemplate<LoginInfoResDto>> getAccessTokenByRefreshToken(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
         if (refreshToken == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED_EXCEPTION, "리프레시 토큰이 없습니다.");
         }
@@ -42,7 +42,7 @@ public class KakaoLoginController {
     }
 
     @PostMapping("/test-account")
-    public ApiResTemplate<LoginInfoResDto> testLogin() {
-        return ApiResTemplate.successResponse(SuccessCode.SUCCESS, kakaoLoginService.testLogin());
+    public ResponseEntity<ApiResTemplate<LoginInfoResDto>> testLogin() {
+        return kakaoLoginService.testLogin();
     }
 }

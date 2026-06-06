@@ -42,6 +42,13 @@ public class SecurityConfig {
                         .requestMatchers( "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/login/**").permitAll()
                         .requestMatchers("/api/v1/form-data/**").permitAll()
+                        .requestMatchers("/api/v1/projects/users/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/users/profile/*").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET,"/api/v1/users/*/reviews").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET,"/api/v1/reviews/tags/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET,"/api/v1/reviews/spectrums/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET,"/api/v1/projects/*").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET,"/api/v1/users/*/projects/*/reviews").permitAll()
                         .anyRequest().authenticated()   // 그 외 모든 요청은 인증 필요
                 )
                 .build();
