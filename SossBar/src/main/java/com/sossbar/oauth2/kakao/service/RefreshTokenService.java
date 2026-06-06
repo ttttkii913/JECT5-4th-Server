@@ -117,4 +117,51 @@ public class RefreshTokenService {
                 .body(ApiResTemplate.successResponse(SuccessCode.SUCCESS, loginInfoResDto));
 
     }
+
+    // 쿠키 삭제
+    public ResponseEntity<ApiResTemplate<String>> logout(String refreshToken) {
+
+        // DB에 저장된 refreshToken 제거
+        if (refreshToken != null) {
+            try {
+                Long userId = jwtTokenProvider.getUserId(refreshToken);
+
+                userRepository.findById(userId)
+                        .ifPresent(user -> {
+                            user.saveRefreshToken(null);
+                            userRepository.save(user);
+                        });
+
+            } catch (Exception e) {
+                log.warn("로그아웃 중 refreshToken 처리 실패");
+            }
+        }
+
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(0)
+                .sameSite(cookieSameSite)
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .path("/")
+                .maxAge(0)
+                .sameSite(cookieSameSite)
+                .build();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(ApiResTemplate.successResponse(
+                        SuccessCode.SUCCESS,
+                        "로그아웃 완료"
+                ));
+    }
 }

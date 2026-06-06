@@ -30,24 +30,35 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
 
         try {
-            if (uri.equals("/api/v1/login/reissue")) {
+            if (uri.startsWith("/api/v1/login")
+                    || uri.startsWith("/swagger-ui")
+                    || uri.startsWith("/v3/api-docs")) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
             String token = resolveToken(request);
 
-            // TODO: 회원 탈퇴시 토큰 사용 불가능 하게 예외 설정
-            if (token != null) {
-                if (jwtTokenProvider.validateToken(token)) {
-                    Authentication authentication = jwtTokenProvider.getAuthentication(token);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                } else {
-                    setErrorResponse(response, ErrorCode.JWT_INVALID);
+            if (StringUtils.hasText(token)) {
+                try {
+                    if (jwtTokenProvider.validateToken(token)) {
+                        Authentication authentication =
+                                jwtTokenProvider.getAuthentication(token);
+
+                        SecurityContextHolder.getContext()
+                                .setAuthentication(authentication);
+                    }
+                } catch (BusinessException e) {
+
+                    if (e.getErrorCode() == ErrorCode.JWT_EXPIRED) {
+                        setErrorResponse(response, ErrorCode.JWT_EXPIRED);
+                        return;
+                    }
+
+                    setErrorResponse(response, e.getErrorCode());
                     return;
                 }
             }
-
             filterChain.doFilter(request, response);
 
         } catch (BusinessException ex) {

@@ -12,8 +12,6 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 @Configuration
 public class SwaggerConfig {
 
-    private static final String AUTH_TOKEN_HEADER = "Authorization";
-
     private Info apiInfo() {
         return new Info()
                 .title("SossBar Swagger API")
@@ -30,14 +28,6 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .openapi("3.1.0")
-                .info(apiInfo())
-                .addSecurityItem(new SecurityRequirement().addList(AUTH_TOKEN_HEADER))
-                .components(new Components()
-                        .addSecuritySchemes(AUTH_TOKEN_HEADER, new SecurityScheme() // 보안 스키마 추가
-                                .name(AUTH_TOKEN_HEADER) // 보안 스키마 이름
-                                .type(SecurityScheme.Type.HTTP) // 스키마 타입
-                                .scheme("Bearer") // 인증 스키마
-                                .bearerFormat("JWT"))); // Bearer 포맷
-
+                .info(apiInfo());
     }
 }

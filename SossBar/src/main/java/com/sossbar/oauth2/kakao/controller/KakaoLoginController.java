@@ -45,4 +45,10 @@ public class KakaoLoginController {
     public ResponseEntity<ApiResTemplate<LoginInfoResDto>> testLogin() {
         return kakaoLoginService.testLogin();
     }
+
+    @Operation(summary = "쿠키 토큰 삭제", description = "쿠키에 들어있는 토큰 삭제로 로그아웃시 사용 가능")
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResTemplate<String>> logout(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
+        return refreshTokenService.logout(refreshToken);
+    }
 }
