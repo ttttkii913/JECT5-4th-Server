@@ -178,16 +178,16 @@ public class ReviewService {
             return ReviewValidReason.SELF_REVIEW;
         }
 
-        if (reviewRepository.existsByReviewerAndRevieweeAndProject(reviewer, reviewee, project)) {
-            return ReviewValidReason.ALREADY_REVIEWED;
-        }
-
         if (!projectMemberRepository.existsByProjectAndUser(project, reviewer)) {
             return ReviewValidReason.REVIEWER_NOT_IN_PROJECT;
         }
 
         if (!projectMemberRepository.existsByProjectAndUser(project, reviewee)) {
             return ReviewValidReason.REVIEWEE_NOT_IN_PROJECT;
+        }
+
+        if (reviewRepository.existsByReviewerAndRevieweeAndProject(reviewer, reviewee, project)) {
+            return ReviewValidReason.ALREADY_REVIEWED;
         }
 
         return ReviewValidReason.VALID;

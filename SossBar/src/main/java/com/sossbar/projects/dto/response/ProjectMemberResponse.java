@@ -15,5 +15,5 @@ public class ProjectMemberResponse {
     private MemberStatus memberStatus;
 
     @Builder.Default
-    private Boolean reviewWritten = false;
+    private boolean reviewWritten = false;
 }
