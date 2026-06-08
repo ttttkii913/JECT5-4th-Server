@@ -5,6 +5,7 @@ import com.sossbar.global.common.template.ApiResTemplate;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
 import com.sossbar.review.dto.response.CommonReviewResDto;
 import com.sossbar.review.dto.response.ReviewCreateResDto;
+import com.sossbar.review.dto.response.ReviewValidResDto;
 import com.sossbar.review.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,4 +55,15 @@ public class ReviewController {
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, reviews);
     }
 
+    @Operation(summary = "후기 작성 가능 여부 검증", description = "후기 생성 전 로그인한 사용자가 후기를 작성할 수 있는 상태인지 검증합니다. " +
+            "<br> 같은 프로젝트에 참여중인지, 자기 자신, 이미 작성했는지 여부 검증")
+    @GetMapping("/api/v1/reviews/validate")
+    public ApiResTemplate<ReviewValidResDto> validateReview(
+            Principal principal,
+            @RequestParam Long projectId,
+            @RequestParam Long revieweeId
+    ) {
+        ReviewValidResDto reviewValidResDto = reviewService.validateReview(principal, projectId, revieweeId);
+        return ApiResTemplate.successResponse(SuccessCode.SUCCESS, reviewValidResDto);
+    }
 }
