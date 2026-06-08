@@ -1,5 +1,6 @@
 package com.sossbar.review.repository;
 
+import com.sossbar.projects.entity.Project;
 import com.sossbar.review.entity.Review;
 import com.sossbar.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +15,7 @@ import java.util.Set;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // 중복 후기 검증
-    boolean existsByReviewerAndReviewee(User reviewer, User reviewee);
+    boolean existsByReviewerAndRevieweeAndProject(User reviewer, User reviewee, Project project);
 
     // 사용자가 받은 후기 목록 (프로젝트 생성 날짜 기준 내림차순)
     @Query("""

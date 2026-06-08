@@ -13,5 +13,7 @@ public class ProjectMemberResponse {
     private String username;
     private String profileImageUrl;
     private MemberStatus memberStatus;
-    private Boolean reviewWritten;
+
+    @Builder.Default
+    private boolean reviewWritten = false;
 }
