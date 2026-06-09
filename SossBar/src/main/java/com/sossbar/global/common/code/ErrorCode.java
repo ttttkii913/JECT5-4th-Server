@@ -52,7 +52,8 @@ public enum ErrorCode {
     DUPLICATE_REVIEW_EXCEPTION(HttpStatus.CONFLICT,"이미 해당 사용자에게 후기를 남겼습니다. revieweeId = ","REVIEW-001"),
     SELF_REVIEW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신에게 후기를 남길 수 없습니다.", "REVIEW-002"),
     TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "일부 태그가 존재하지 않습니다.", "REVIEW-003"),
-    SPECTRUM_NOT_FOUND(HttpStatus.NOT_FOUND, "일부 스펙트럼이 존재하지 않습니다.", "REVIEW-004");
+    SPECTRUM_NOT_FOUND(HttpStatus.NOT_FOUND, "일부 스펙트럼이 존재하지 않습니다.", "REVIEW-004"),
+    INVALID_PAGE_SIZE_EXCEPTION(HttpStatus.BAD_REQUEST, "페이지 크기는 1 이상이어야 합니다.", "REVIEW-005");
 
     private final HttpStatus httpStatus;
     private final String message;

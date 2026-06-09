@@ -124,8 +124,12 @@ public class ReviewService {
 
     // 전체 후기 조회
     public ReviewCursorResDto getReviews(Principal principal, Long userId, Long cursor, int size) {
+        // 페이지가 1 미만이면 오류 발생
+        if (size < 1) throw new BusinessException(ErrorCode.INVALID_PAGE_SIZE_EXCEPTION, "");
+
         Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
 
+        int pageSize = Math.min(100, Math.max(1, size));
         Pageable pageable = PageRequest.of(0, size + 1);
         List<Review> reviews = reviewRepository.findByRevieweeIdWithCursor(userId, cursor, pageable);
 
@@ -135,7 +139,7 @@ public class ReviewService {
         Long nextCursor = hasNext ? reviews.get(reviews.size() - 1).getReviewId() : null;
 
         // 내 후기 / 사용자 후기 조회 결정
-        boolean isMine = userId.equals(loginUserId);
+        boolean isMine = userId != null && userId.equals(loginUserId);
         List<CommonReviewResDto> dtos = reviews.stream()
                 .map(review -> isMine ? ReviewPrivateResDto.from(review) : ReviewPublicResDto.from(review))
                 .collect(Collectors.toList());
