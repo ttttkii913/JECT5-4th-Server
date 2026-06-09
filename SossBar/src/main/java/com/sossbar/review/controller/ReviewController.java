@@ -5,6 +5,7 @@ import com.sossbar.global.common.template.ApiResTemplate;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
 import com.sossbar.review.dto.response.CommonReviewResDto;
 import com.sossbar.review.dto.response.ReviewCreateResDto;
+import com.sossbar.review.dto.response.ReviewCursorResDto;
 import com.sossbar.review.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,11 +36,13 @@ public class ReviewController {
 
     @Operation(summary = "전체 후기 조회", description = "특정 사용자에 대한 전체 후기를 조회할 수 있습니다.")
     @GetMapping("/api/v1/users/{userId}/reviews")
-    public ApiResTemplate<List<CommonReviewResDto>> getReviews(
+    public ApiResTemplate<ReviewCursorResDto> getReviews(
             Principal principal,
-            @PathVariable Long userId
+            @PathVariable Long userId,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = "5") int size
     ) {
-        List<CommonReviewResDto> reviews = reviewService.getReviews(principal, userId);
+        ReviewCursorResDto reviews = reviewService.getReviews(principal, userId, cursor, size);
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, reviews);
     }
 
