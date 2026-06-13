@@ -3,6 +3,7 @@ package com.sossbar.review.repository;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.review.entity.Review;
 import com.sossbar.user.entity.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,4 +33,18 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     @Query("SELECT r FROM Review r JOIN FETCH r.project WHERE r.reviewee.id = :userId AND r.project.id = :projectId")
     List<Review> findAllByRevieweeIdAndProjectProjectId(@Param("userId")  Long userId, @Param("projectId") Long projectId);
+
+    // 페이지네이션
+    @Query("""
+        SELECT r
+        FROM Review r
+        JOIN FETCH r.project
+        WHERE r.reviewee.id = :userId
+        AND (:cursor IS NULL OR r.reviewId < :cursor)
+        ORDER BY r.reviewId DESC
+        """)
+    List<Review> findByRevieweeIdWithCursor(
+            @Param("userId") Long userId,
+            @Param("cursor") Long cursor,
+            Pageable pageable);
 }

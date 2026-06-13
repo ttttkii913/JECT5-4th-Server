@@ -23,6 +23,8 @@ import com.sossbar.tag.repository.TagRepository;
 import com.sossbar.user.entity.User;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -122,20 +124,32 @@ public class ReviewService {
     }
 
     // 전체 후기 조회
-    public List<CommonReviewResDto> getReviews(Principal principal, Long userId) {
-        Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
-        List<Review> reviews = reviewRepository.findAllByRevieweeId(userId);
+    public ReviewCursorResDto getReviews(Principal principal, Long userId, Long cursor, int size) {
+        // 페이지가 1 미만이면 오류 발생
+        if (size < 1) throw new BusinessException(ErrorCode.INVALID_PAGE_SIZE_EXCEPTION, "");
 
-        // 내가 내 전체 후기 조회
-        if (userId.equals(loginUserId)) {
-            return reviews.stream()
-                    .map(ReviewPrivateResDto::from)
-                    .collect(Collectors.toList());
-        }
-        // 다른 사용자 전체 후기 조회
-        return reviews.stream()
-                .map(ReviewPublicResDto::from)
+        Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
+
+        int pageSize = Math.min(100, Math.max(1, size));
+        Pageable pageable = PageRequest.of(0, size + 1);
+        List<Review> reviews = reviewRepository.findByRevieweeIdWithCursor(userId, cursor, pageable);
+
+        boolean hasNext = reviews.size() > size;
+        if(hasNext) reviews = reviews.subList(0, size);
+
+        Long nextCursor = hasNext ? reviews.get(reviews.size() - 1).getReviewId() : null;
+
+        // 내 후기 / 사용자 후기 조회 결정
+        boolean isMine = userId != null && userId.equals(loginUserId);
+        List<CommonReviewResDto> dtos = reviews.stream()
+                .map(review -> isMine ? ReviewPrivateResDto.from(review) : ReviewPublicResDto.from(review))
                 .collect(Collectors.toList());
+
+        return ReviewCursorResDto.builder()
+                .reviews(dtos)
+                .nextCursor(nextCursor)
+                .hasNext(hasNext)
+                .build();
     }
 
     // 프로젝트별 후기 조회
