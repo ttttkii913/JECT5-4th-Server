@@ -1,0 +1,28 @@
+package com.sossbar.projects.dto.response;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sossbar.projects.enums.MemberStatus;
+import com.sossbar.projects.enums.ProjectStatus;
+import lombok.Builder;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Getter
+@Builder
+public class MyProjectResponse {
+
+    private Long projectId;
+    private String projectName;
+    private String host;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime startDate;
+    private String projectLink;
+    private String projectImage;
+    private ProjectStatus projectStatus;
+    private MemberStatus myMemberStatus;
+    private List<ProjectMemberResponse> members;
+    private int memberCount;
+}
