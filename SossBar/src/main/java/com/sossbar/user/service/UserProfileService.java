@@ -4,9 +4,12 @@ import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.global.config.S3Service;
 import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
+import com.sossbar.user.dto.request.UserLinkReqDto;
 import com.sossbar.user.dto.response.UserInfoResDto;
 import com.sossbar.user.dto.response.UserProfileInfoResDto;
 import com.sossbar.user.entity.User;
+import com.sossbar.user.entity.UserLink;
+import com.sossbar.user.entity.UserPosition;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +46,32 @@ public class UserProfileService {
             newProfileImageUrl = uploadedImageUrl;
         }
 
-        user.updateUserInfo(userInfoUpdateReqDto, newProfileImageUrl);
+        // 직군 ETC 선택시 직접 직군 입력
+        if (userInfoUpdateReqDto.defaultPosition() == UserPosition.ETC
+                && (userInfoUpdateReqDto.defaultDetailPosition() == null
+                || userInfoUpdateReqDto.defaultDetailPosition().isBlank())) {
+            throw new BusinessException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "직군을 입력해 주세요.");
+        }
+
+        if (userInfoUpdateReqDto.links() != null && userInfoUpdateReqDto.links().size() > 3) {
+            throw new BusinessException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "Link는 최대 3개까지만 추가할 수 있습니다.");
+        }
+
+        // 프로필 수정에서도 link 수정
+        List<UserLink> newLinks = null;
+        if (userInfoUpdateReqDto.links() != null) {
+            newLinks = userInfoUpdateReqDto.links().stream()
+                    .map(linkDto -> UserLinkReqDto.createLink(user, linkDto))
+                    .toList();
+        }
+
+        user.updateUserInfo(userInfoUpdateReqDto, newProfileImageUrl, newLinks);
+        userRepository.saveAndFlush(user);
+
         user.updateMarketingAgree(userInfoUpdateReqDto.marketingAgree());
 
         return UserInfoResDto.from(user);

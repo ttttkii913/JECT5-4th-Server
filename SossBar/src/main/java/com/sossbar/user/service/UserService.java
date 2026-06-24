@@ -8,14 +8,18 @@ import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.projects.enums.MemberStatus;
 import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
+import com.sossbar.user.dto.request.UserLinkReqDto;
 import com.sossbar.user.dto.response.UserInfoResDto;
 import com.sossbar.user.entity.User;
+import com.sossbar.user.entity.UserLink;
+import com.sossbar.user.entity.UserPosition;
 import com.sossbar.user.repository.UserRepository;
 import com.sossbar.user_delete_reason.dto.request.UserDeleteReqDto;
 import com.sossbar.user_delete_reason.entity.UserDeleteReasonEnum;
 import com.sossbar.user_delete_reason.entity.UserDeleteReason;
 import com.sossbar.user_delete_reason.repository.UserDeleteReasonRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +28,7 @@ import java.security.Principal;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
@@ -33,7 +38,7 @@ public class UserService {
     private final ProjectMemberRepository projectMemberRepository;
     private final UserDeleteReasonRepository userDeleteReasonLogRepository;
 
-    // 온보딩 - 사용자 추가 정보 입력 (실명, 한 줄 소개, 프로필 이미지)
+    // 온보딩 - 사용자 추가 정보 입력 (실명, 한 줄 소개, 프로필 이미지, 직군, 동의 항목 여부)
     @Transactional
     public UserInfoResDto onboarding(Principal principal, UserInfoUpdateReqDto userInfoUpdateReqDto, MultipartFile profileImage) {
         Long id = Long.parseLong(principal.getName());
@@ -55,13 +60,40 @@ public class UserService {
             );
         }
 
+        // 직군 ETC 선택시 직접 직군 입력
+        if (userInfoUpdateReqDto.defaultPosition() == UserPosition.ETC
+                && (userInfoUpdateReqDto.defaultDetailPosition() == null
+                || userInfoUpdateReqDto.defaultDetailPosition().isBlank())) {
+            throw new BusinessException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "직군을 입력해 주세요.");
+        }
+
+        // 최대 3개까지만 링크 추가 가능
+        if (userInfoUpdateReqDto.links() != null && userInfoUpdateReqDto.links().size() > 3) {
+            throw new BusinessException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "Link는 최대 3개까지만 추가할 수 있습니다.");
+        }
+
         // 아무것도 보내지 않으면 초기 이미지는 null로
         String profileImageUrl = null;
         if (profileImage != null && !profileImage.isEmpty()) {
             profileImageUrl = s3Service.uploadFile(profileImage, "sossbar/profile");
         }
 
-        user.updateUserInfo(userInfoUpdateReqDto, profileImageUrl);
+        // 새 링크 저장
+        List<UserLink> newLinks = null;
+        if (userInfoUpdateReqDto.links() != null) {
+            newLinks = userInfoUpdateReqDto.links().stream()
+                    .map(linkDto -> UserLinkReqDto.createLink(user, linkDto))
+                    .toList();
+        }
+        user.getLinks().forEach(link ->
+                log.info("id={}, url={}", link.getId(), link.getUserLink())
+        );
+        user.updateUserInfo(userInfoUpdateReqDto, profileImageUrl, newLinks);
+        userRepository.saveAndFlush(user);
 
         // 마케팅 동의 여부 저장
         user.updateMarketingAgree(userInfoUpdateReqDto.marketingAgree());
