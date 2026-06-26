@@ -23,7 +23,7 @@ public class ReviewPrivateResDto extends CommonReviewResDto {
         dto.reviewId = review.getReviewId();
         dto.projectImage = review.getProject().getProjectImage();
         dto.createdAt = review.getCreatedAt();
-        dto.reviewerNickname = review.getReviewer().getUsername();
+        dto.reviewerNickname = review.getReviewer() != null ? review.getReviewer().getUsername() : null;
         return dto;
     }
 }
