@@ -1,6 +1,8 @@
 package com.sossbar.review.dto.response;
 
+import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.review.entity.Review;
+import com.sossbar.user.entity.UserPosition;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,11 +14,16 @@ public class ReviewPublicResDto extends CommonReviewResDto {
     private String host;
     private String positiveFeedback;
 
-    public static ReviewPublicResDto from(Review review) {
+    private UserPosition projectPosition;
+    private String projectDetailPosition;
+
+    public static ReviewPublicResDto from(Review review, ProjectMember projectMember) {
         ReviewPublicResDto dto = ReviewPublicResDto.builder()
                 .projectName(review.getProject().getProjectName())
                 .host(review.getProject().getHost())
                 .positiveFeedback(review.getPositiveFeedback())
+                .projectPosition(projectMember != null ? projectMember.getProjectPosition() : null)
+                .projectDetailPosition(projectMember != null ? projectMember.getProjectDetailPosition() : null)
                 .build();
         dto.reviewId = review.getReviewId();
         dto.projectImage = review.getProject().getProjectImage();

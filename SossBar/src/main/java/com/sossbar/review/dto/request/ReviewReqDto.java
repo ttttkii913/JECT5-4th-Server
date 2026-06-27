@@ -3,6 +3,7 @@ package com.sossbar.review.dto.request;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.review.entity.Review;
 import com.sossbar.user.entity.User;
+import com.sossbar.user.entity.UserPosition;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -30,6 +31,10 @@ public class ReviewReqDto {
     private Long projectId;
 
     private List<Long> tagIds;
+
+    @NotNull
+    private UserPosition projectPosition;
+    private String projectDetailPosition;
 
     public Review toEntity(User reviewer, User reviewee, Project project) {
         return Review.builder()
