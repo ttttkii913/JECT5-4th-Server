@@ -175,7 +175,7 @@ public class ReviewService {
 
         List<CommonReviewResDto> dtos = reviews.stream()
                 .map(review -> {
-                    String key = review.getProject().getProjectId() + "_" + review.getReviewee().getId();
+                    String key = review.getProject().getProjectId() + "_" + review.getReviewer().getId();
                     ProjectMember member = projectMemberMap.get(key);
 
                     return isMine
@@ -203,7 +203,7 @@ public class ReviewService {
 
         return reviews.stream()
                 .map(review -> {
-                    String key = review.getProject().getProjectId() + "_" + review.getReviewee().getId();
+                    String key = review.getProject().getProjectId() + "_" + review.getReviewer().getId();
                     ProjectMember member = projectMemberMap.get(key);
 
                     return isMine
@@ -215,9 +215,9 @@ public class ReviewService {
 
     private Map<String, ProjectMember> getProjectMemberMap(List<Review> reviews) {
         List<Project> projects = reviews.stream().map(Review::getProject).distinct().toList();
-        List<User> reviewees = reviews.stream().map(Review::getReviewee).distinct().toList();
+        List<User> reviewers = reviews.stream().map(Review::getReviewer).distinct().toList();
 
-        List<ProjectMember> members = projectMemberRepository.findAllByProjectInAndUserIn(projects, reviewees);
+        List<ProjectMember> members = projectMemberRepository.findAllByProjectInAndUserIn(projects, reviewers);
 
         return members.stream().collect(Collectors.toMap(
                 m -> m.getProject().getProjectId() + "_" + m.getUser().getId(),

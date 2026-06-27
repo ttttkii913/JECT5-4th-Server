@@ -42,8 +42,8 @@ public class ProjectMemberService {
                 .project(project)
                 .user(user)
                 .memberStatus(MemberStatus.MEMBER)
-                .projectPosition(user.getDefaultPosition())
-                .projectDetailPosition(user.getDefaultDetailPosition())
+                .projectPosition(null)
+                .projectDetailPosition(null)
                 .build();
 
         projectMemberRepository.save(projectMember);

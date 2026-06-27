@@ -58,9 +58,16 @@ public class MyProjectResponse {
                 .projectImage(project.getProjectImage())
                 .projectStatus(project.getProjectStatus())
                 .myMemberStatus(myMembership.getMemberStatus())
-                .projectPosition(myMembership.getProjectPosition())
-                .projectDetailPosition(myMembership.getProjectDetailPosition())
-                .members(members)
+                .projectPosition(
+                        myMembership.getProjectPosition() != null
+                                ? myMembership.getProjectPosition()
+                                : myMembership.getUser().getDefaultPosition()
+                )
+                .projectDetailPosition(
+                        myMembership.getProjectDetailPosition() != null
+                                ? myMembership.getProjectDetailPosition()
+                                : myMembership.getUser().getDefaultDetailPosition()
+                )                .members(members)
                 .memberCount(memberCount)
                 .build();
     }
