@@ -41,7 +41,6 @@ public class KakaoLoginController {
         return refreshTokenService.getAccessTokenByRefreshToken(refreshToken);
     }
 
-    @Operation(summary = "테스트 계정 로그인", description = "test 게정 로그인 API입니다.")
     @PostMapping("/test-account")
     public ResponseEntity<ApiResTemplate<LoginInfoResDto>> testLogin() {
         return kakaoLoginService.testLogin();

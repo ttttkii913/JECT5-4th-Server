@@ -28,7 +28,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "사용자 정보 추가 입력", description = "카카오 로그인을 완료한 사용자가 최초 1회 추가 정보(실명, 한 줄 소개, 프로필 이미지, 직군, url, 동의 항목 여부)를 입력합니다." +
+    @Operation(summary = "사용자 정보 추가 입력", description = "카카오 로그인을 완료한 사용자가 최초 1회 추가 정보(실명, 한 줄 소개, 프로필 이미지)를 입력합니다." +
             "<br> 이미지를 빈 값으로 보낼 시 url은 null로 저장됨")
     @PostMapping(value = "/onboarding", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResTemplate<UserInfoResDto> saveUserInfo(Principal principal,

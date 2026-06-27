@@ -49,36 +49,55 @@ public class ProjectController {
 
     @Operation(summary = "유저 프로젝트 리스트 조회", description = "특정 유저가 속한 프로젝트 목록을 조회하는 API입니다.")
     @GetMapping("/users/{userId}")
-    public ApiResTemplate<List<PublicProjectResponse>> getUserProjects(@PathVariable("userId") Long userId) {
+    public ApiResTemplate<List<PublicProjectResponse>> getUserProjects(@PathVariable Long userId) {
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getUserProjects(userId));
     }
 
-    @Operation(summary = "프로젝트 상세 조회", description = "프로젝트 ID로 단일 프로젝트를 조회하는 API입니다.")
+    @Operation(summary = "프로젝트 조회", description = "프로젝트 ID로 단일 프로젝트를 조회하는 API입니다.")
     @GetMapping("/{projectId:\\d+}")
     public ApiResTemplate<ProjectResponse> getProject(
-            @PathVariable Long projectId,
-            Principal principal
+            @PathVariable Long projectId
     ) {
-        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getProject(projectId, principal));
+        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getProject(projectId));
     }
 
     @Operation(summary = "프로젝트 수정", description = "프로젝트 정보를 수정하는 API입니다.")
     @PatchMapping(value = "/{projectId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResTemplate<ProjectResponse> updateProject(
-            @PathVariable("projectId") Long projectId,
+            @PathVariable Long projectId,
             @RequestPart("request") @Valid ProjectUpdateRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image,
-            Principal principal
+            @RequestPart(value = "image", required = false) MultipartFile image
     ) {
-        return ApiResTemplate.successResponse(SuccessCode.UPDATE_SUCCESS, projectFacade.updateProject(projectId, request, image, principal));
+        return ApiResTemplate.successResponse(SuccessCode.UPDATE_SUCCESS, projectFacade.updateProject(projectId, request, image));
     }
 
     @Operation(summary = "프로젝트 삭제", description = "프로젝트를 삭제하는 API입니다.")
     @DeleteMapping("/{projectId}")
     public ApiResTemplate<Void> deleteProject(
-            @PathVariable("projectId") Long projectId
+            @PathVariable Long projectId
     ) {
         projectFacade.deleteProject(projectId);
         return ApiResTemplate.successWithNoContent(SuccessCode.DELETE_SUCCESS);
+    }
+
+    @Operation(summary = "팀원 추가", description = "프로젝트에 팀원을 추가하는 API입니다.")
+    @PostMapping("invite/{projectId}")
+    public ApiResTemplate<Void> inviteProjectMember(Principal principal, @PathVariable Long projectId) {
+        projectService.inviteProjectMember(principal, projectId);
+        return ApiResTemplate.successResponse(SuccessCode.CREATE_SUCCESS, null);
+    }
+
+    @Operation(summary = "팀원 삭제", description = "프로젝트에서 팀원을 삭제하는 API입니다.")
+    @DeleteMapping("{projectId}/{userId}")
+    public ApiResTemplate<Void> deleteProjectMember(Principal principal, @PathVariable Long projectId, @PathVariable Long userId) {
+        projectService.deleteProjectMember(principal, projectId, userId);
+        return ApiResTemplate.successWithNoContent(SuccessCode.DELETE_SUCCESS);
+    }
+
+    @Operation(summary = "팀원 확정", description = "프로젝트 팀원을 확정하는 API입니다.")
+    @PatchMapping("confirm/{projectId}")
+    public ApiResTemplate<Void> confirmProjectMembers(Principal principal, @PathVariable Long projectId) {
+        projectService.confirmProjectMembers(principal, projectId);
+        return ApiResTemplate.successResponse(SuccessCode.UPDATE_SUCCESS, null);
     }
 }

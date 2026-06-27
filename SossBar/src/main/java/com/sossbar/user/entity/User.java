@@ -1,7 +1,5 @@
 package com.sossbar.user.entity;
 
-import com.sossbar.global.common.code.ErrorCode;
-import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.global.common.template.BaseTimeEntity;
 import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
 import jakarta.persistence.*;
@@ -9,9 +7,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -30,14 +25,6 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private UserType userType;
-
-    @Enumerated(EnumType.STRING)
-    private UserPosition defaultPosition;
-    private String defaultDetailPosition;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserLink> links = new ArrayList<>();
-
     private String refreshToken;
 
     @Column(name = "user_info_delete")
@@ -46,19 +33,17 @@ public class User extends BaseTimeEntity {
     private boolean marketingAgree = false;
 
     @Builder
-    public User(String username, String email, String bio, String profileImageUrl, UserType userType, UserPosition defaultPosition, String defaultDetailPosition, String refreshToken, boolean marketingAgree) {
+    public User(String username, String email, String bio, String profileImageUrl, UserType userType, String refreshToken, boolean marketingAgree) {
         this.username = username;
         this.email = email;
         this.bio = bio;
         this.profileImageUrl = profileImageUrl;
         this.userType = userType;
-        this.defaultPosition = defaultPosition;
-        this.defaultDetailPosition = defaultDetailPosition;
         this.refreshToken = refreshToken;
         this.marketingAgree = marketingAgree;
     }
 
-    public void updateUserInfo(UserInfoUpdateReqDto userInfoUpdateReqDto, String profileImageUrl, List<UserLink> newLinks) {
+    public void updateUserInfo(UserInfoUpdateReqDto userInfoUpdateReqDto, String profileImageUrl) {
         if (userInfoUpdateReqDto.username() != null) {
             this.username = userInfoUpdateReqDto.username();
         }
@@ -69,19 +54,6 @@ public class User extends BaseTimeEntity {
 
         if (profileImageUrl != null) {
             this.profileImageUrl = profileImageUrl;
-        }
-
-        if (userInfoUpdateReqDto.defaultPosition() != null) {
-            this.defaultPosition = userInfoUpdateReqDto.defaultPosition();
-            this.defaultDetailPosition =
-                    userInfoUpdateReqDto.defaultPosition() == UserPosition.ETC
-                            ? userInfoUpdateReqDto.defaultDetailPosition()
-                            : null;
-        }
-
-        if (newLinks != null) {
-            this.links.clear();
-            this.links.addAll(newLinks);
         }
     }
 

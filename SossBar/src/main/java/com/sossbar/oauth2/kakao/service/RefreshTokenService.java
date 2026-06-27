@@ -87,7 +87,7 @@ public class RefreshTokenService {
         // userId 추출 및 엔티티 조회
         Long userId = jwtTokenProvider.getUserId(refreshToken);
 
-        User user = userRepository.findByIdAndIsDeletedFalse(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage()

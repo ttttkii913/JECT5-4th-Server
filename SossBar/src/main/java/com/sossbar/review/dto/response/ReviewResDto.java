@@ -5,7 +5,8 @@ import com.sossbar.tag.dto.response.TagResDto;
 import java.util.List;
 
 public record ReviewResDto (
-        String feedback,
+        String positiveFeedback,
+        String negativeFeedback,
         Long revieweeId,
         Long projectId,
         List<TagResDto> tagResDtos
