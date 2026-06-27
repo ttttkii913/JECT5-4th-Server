@@ -16,11 +16,8 @@ import java.util.List;
 @Getter
 public class ReviewReqDto {
     @NotBlank
-    @Size(min = 10)
-    private String positiveFeedback;
-
-    @Size(min = 10)
-    private String negativeFeedback;
+    @Size(min = 10, max = 1000)
+    private String feedback;
 
     @NotNull
     @Positive
@@ -38,8 +35,7 @@ public class ReviewReqDto {
 
     public Review toEntity(User reviewer, User reviewee, Project project) {
         return Review.builder()
-                .positiveFeedback(positiveFeedback)
-                .negativeFeedback(negativeFeedback)
+                .feedback(feedback)
                 .reviewer(reviewer)
                 .reviewee(reviewee)
                 .project(project)

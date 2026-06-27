@@ -23,8 +23,7 @@ public record ReviewCreateResDto (
               .collect(Collectors.toList());
 
       ReviewResDto reviewResDto = new ReviewResDto(
-              savedReview.getPositiveFeedback(),
-              savedReview.getNegativeFeedback(),
+              savedReview.getFeedback(),
               savedReview.getReviewee().getId(),
               savedReview.getProject().getProjectId(),
               tagResDtos
