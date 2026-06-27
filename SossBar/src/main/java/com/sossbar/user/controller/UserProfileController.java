@@ -33,7 +33,7 @@ public class UserProfileController {
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, userProfileInfoResDto);
     }
 
-    @Operation(summary = "내 프로필 수정", description = "로그인한 사용자가 자신의 프로필 정보를 수정합니다. (실명, 한 줄 소개, 프로필 이미지)" +
+    @Operation(summary = "내 프로필 수정", description = "로그인한 사용자가 자신의 프로필 정보를 수정합니다. (실명, 한 줄 소개, 프로필 이미지, 직군, link)" +
             "<br> 이미지를 빈 값으로 보낼 시 기존 프로필 이미지 유지")
     @PatchMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResTemplate<UserInfoResDto> updateUserInfo(Principal principal,

@@ -34,15 +34,22 @@ public class KakaoLoginController {
 
     @Operation(summary = "리프레시 토큰으로 액세스 토큰 재발급", description = "HttpOnly 쿠키에 있는 refreshToken으로 accessToken을 재발급합니다.")
     @PostMapping("/reissue")
-    public ApiResTemplate<LoginInfoResDto> getAccessTokenByRefreshToken(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
+    public ResponseEntity<ApiResTemplate<LoginInfoResDto>> getAccessTokenByRefreshToken(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
         if (refreshToken == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED_EXCEPTION, "리프레시 토큰이 없습니다.");
         }
         return refreshTokenService.getAccessTokenByRefreshToken(refreshToken);
     }
 
+    @Operation(summary = "테스트 계정 로그인", description = "test 게정 로그인 API입니다.")
     @PostMapping("/test-account")
-    public ApiResTemplate<LoginInfoResDto> testLogin() {
-        return ApiResTemplate.successResponse(SuccessCode.SUCCESS, kakaoLoginService.testLogin());
+    public ResponseEntity<ApiResTemplate<LoginInfoResDto>> testLogin() {
+        return kakaoLoginService.testLogin();
+    }
+
+    @Operation(summary = "쿠키 토큰 삭제", description = "쿠키에 들어있는 토큰 삭제로 로그아웃시 사용 가능")
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResTemplate<String>> logout(@CookieValue(value = "refreshToken", required = false) String refreshToken) {
+        return refreshTokenService.logout(refreshToken);
     }
 }

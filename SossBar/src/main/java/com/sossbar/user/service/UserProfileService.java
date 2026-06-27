@@ -4,9 +4,12 @@ import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.global.config.S3Service;
 import com.sossbar.user.dto.request.UserInfoUpdateReqDto;
+import com.sossbar.user.dto.request.UserLinkReqDto;
 import com.sossbar.user.dto.response.UserInfoResDto;
 import com.sossbar.user.dto.response.UserProfileInfoResDto;
 import com.sossbar.user.entity.User;
+import com.sossbar.user.entity.UserLink;
+import com.sossbar.user.entity.UserPosition;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,15 +37,35 @@ public class UserProfileService {
         String newProfileImageUrl = user.getProfileImageUrl();
 
         if (profileImage != null && !profileImage.isEmpty()) {
-            // 기존 이미지가 존재한다면 S3에서 삭제
+            // 새 이미지 업로드
+            String uploadedImageUrl = s3Service.uploadFile(profileImage, "sossbar/profile");
+            // 업로드 성공 후 기존 이미지가 존재한다면 S3에서 삭제
             if (newProfileImageUrl != null && !newProfileImageUrl.isBlank()) {
                 s3Service.deleteFile(newProfileImageUrl);
             }
-            // 새 이미지 업로드
-            newProfileImageUrl = s3Service.uploadFile(profileImage, "sossbar/profile");
+            newProfileImageUrl = uploadedImageUrl;
         }
 
-        user.updateUserInfo(userInfoUpdateReqDto, newProfileImageUrl);
+        // 직군 ETC 선택시 직접 직군 입력
+        if (userInfoUpdateReqDto.defaultPosition() == UserPosition.ETC
+                && (userInfoUpdateReqDto.defaultDetailPosition() == null
+                || userInfoUpdateReqDto.defaultDetailPosition().isBlank())) {
+            throw new BusinessException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "직군을 입력해 주세요.");
+        }
+
+        // 프로필 수정에서도 link 수정
+        List<UserLink> newLinks = null;
+        if (userInfoUpdateReqDto.links() != null) {
+            newLinks = userInfoUpdateReqDto.links().stream()
+                    .map(linkDto -> UserLinkReqDto.createLink(user, linkDto))
+                    .toList();
+        }
+
+        user.updateUserInfo(userInfoUpdateReqDto, newProfileImageUrl, newLinks);
+        userRepository.saveAndFlush(user);
+
         user.updateMarketingAgree(userInfoUpdateReqDto.marketingAgree());
 
         return UserInfoResDto.from(user);

@@ -6,6 +6,7 @@ import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.global.common.template.ApiResTemplate;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -29,24 +30,35 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
 
         try {
-            if (uri.equals("/api/v1/login/reissue")) {
+            if (uri.startsWith("/api/v1/login")
+                    || uri.startsWith("/swagger-ui")
+                    || uri.startsWith("/v3/api-docs")) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
             String token = resolveToken(request);
 
-            // TODO: 회원 탈퇴시 토큰 사용 불가능 하게 예외 설정
-            if (token != null) {
-                if (jwtTokenProvider.validateToken(token)) {
-                    Authentication authentication = jwtTokenProvider.getAuthentication(token);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                } else {
-                    setErrorResponse(response, ErrorCode.JWT_INVALID);
+            if (StringUtils.hasText(token)) {
+                try {
+                    if (jwtTokenProvider.validateToken(token)) {
+                        Authentication authentication =
+                                jwtTokenProvider.getAuthentication(token);
+
+                        SecurityContextHolder.getContext()
+                                .setAuthentication(authentication);
+                    }
+                } catch (BusinessException e) {
+
+                    if (e.getErrorCode() == ErrorCode.JWT_EXPIRED) {
+                        setErrorResponse(response, ErrorCode.JWT_EXPIRED);
+                        return;
+                    }
+
+                    setErrorResponse(response, e.getErrorCode());
                     return;
                 }
             }
-
             filterChain.doFilter(request, response);
 
         } catch (BusinessException ex) {
@@ -64,12 +76,19 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         response.getWriter().write(objectMapper.writeValueAsString(body));
     }
 
-    // 요청에서 토큰 추출 메소드
+    // 요청에서 토큰 추출 메소드 -> 쿠키 추출로 변경
     private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        // 쿠키 추출
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("accessToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
+
         return null;
     }
 }
