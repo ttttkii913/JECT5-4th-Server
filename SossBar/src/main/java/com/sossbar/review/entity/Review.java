@@ -17,11 +17,8 @@ public class Review extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reviewId;
 
-    @Column
-    private String positiveFeedback;
-
-    @Column
-    private String negativeFeedback;
+    @Column(columnDefinition = "TEXT")
+    private String feedback;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewer_id")
@@ -42,9 +39,8 @@ public class Review extends BaseTimeEntity {
     private List<ReviewSpectrum> reviewSpectrums = new ArrayList<>();
 
     @Builder
-    public Review(String positiveFeedback, String negativeFeedback, User reviewer, User reviewee, Project project) {
-        this.positiveFeedback = positiveFeedback;
-        this.negativeFeedback = negativeFeedback;
+    public Review(String feedback, User reviewer, User reviewee, Project project) {
+        this.feedback = feedback;
         this.reviewer = reviewer;
         this.reviewee = reviewee;
         this.project = project;

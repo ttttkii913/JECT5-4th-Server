@@ -3,6 +3,7 @@ package com.sossbar.review.service;
 import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.projects.entity.Project;
+import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
@@ -21,6 +22,7 @@ import com.sossbar.spectrumaxis.repository.SpectrumAxisRepository;
 import com.sossbar.tag.entity.Tag;
 import com.sossbar.tag.repository.TagRepository;
 import com.sossbar.user.entity.User;
+import com.sossbar.user.entity.UserPosition;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -74,6 +76,32 @@ public class ReviewService {
             );
         }
 
+        // 프로젝트 멤버 조회
+        ProjectMember projectMember = projectMemberRepository.findByProjectAndUser(project, reviewer)
+                        .orElseThrow(() -> new BusinessException(
+                                ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
+                                ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
+                        ));
+
+        // 이미 직군을 입력했다면 기존 직군 사용, 없을 때만 새로 등록 및 dto에서 보낸 값은 무시
+        if (projectMember.getProjectPosition() == null) {
+            // 직군 etc valid
+            if (reviewReqDto.getProjectPosition() == UserPosition.ETC
+                    && (reviewReqDto.getProjectDetailPosition() == null
+                    || reviewReqDto.getProjectDetailPosition().isBlank())) {
+
+                throw new BusinessException(
+                        ErrorCode.VALIDATION_ERROR,
+                        "직군을 입력해 주세요."
+                );
+            }
+            // 프로젝트 직군 저장 - 최초 1회만
+            projectMember.updateProjectPosition(
+                    reviewReqDto.getProjectPosition(),
+                    reviewReqDto.getProjectDetailPosition()
+            );
+        }
+
         Review savedReview = reviewRepository.save(reviewReqDto.toEntity(reviewer, reviewee, project));
 
         // 태그 목록 저장
@@ -124,6 +152,7 @@ public class ReviewService {
     }
 
     // 전체 후기 조회
+    @Transactional(readOnly = true)
     public ReviewCursorResDto getReviews(Principal principal, Long userId, Long cursor, int size) {
         // 페이지가 1 미만이면 오류 발생
         if (size < 1) throw new BusinessException(ErrorCode.INVALID_PAGE_SIZE_EXCEPTION, "");
@@ -141,8 +170,18 @@ public class ReviewService {
 
         // 내 후기 / 사용자 후기 조회 결정
         boolean isMine = userId != null && userId.equals(loginUserId);
+
+        Map<String, ProjectMember> projectMemberMap = getProjectMemberMap(reviews);
+
         List<CommonReviewResDto> dtos = reviews.stream()
-                .map(review -> isMine ? ReviewPrivateResDto.from(review) : ReviewPublicResDto.from(review))
+                .map(review -> {
+                    String key = review.getProject().getProjectId() + "_" + review.getReviewer().getId();
+                    ProjectMember member = projectMemberMap.get(key);
+
+                    return isMine
+                            ? ReviewPrivateResDto.from(review, member)
+                            : ReviewPublicResDto.from(review, member);
+                })
                 .collect(Collectors.toList());
 
         return ReviewCursorResDto.builder()
@@ -153,20 +192,38 @@ public class ReviewService {
     }
 
     // 프로젝트별 후기 조회
+    @Transactional(readOnly = true)
     public List<CommonReviewResDto> getReviewsByProject(Principal principal, Long userId, Long projectId) {
         Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
         List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(userId, projectId);
 
-        // 내 프로젝트별 후기 조회
-        if(userId.equals(loginUserId)) {
-            return reviews.stream()
-                    .map(ReviewPrivateResDto::from)
-                    .collect(Collectors.toList());
-        }
-        // 다른 사용자 프로젝트별 후기 조회
+        Map<String, ProjectMember> projectMemberMap = getProjectMemberMap(reviews);
+
+        boolean isMine = userId.equals(loginUserId);
+
         return reviews.stream()
-                .map(ReviewPublicResDto::from)
+                .map(review -> {
+                    String key = review.getProject().getProjectId() + "_" + review.getReviewer().getId();
+                    ProjectMember member = projectMemberMap.get(key);
+
+                    return isMine
+                            ? ReviewPrivateResDto.from(review, member)
+                            : ReviewPublicResDto.from(review, member);
+                })
                 .collect(Collectors.toList());
+    }
+
+    private Map<String, ProjectMember> getProjectMemberMap(List<Review> reviews) {
+        List<Project> projects = reviews.stream().map(Review::getProject).distinct().toList();
+        List<User> reviewers = reviews.stream().map(Review::getReviewer).distinct().toList();
+
+        List<ProjectMember> members = projectMemberRepository.findAllByProjectInAndUserIn(projects, reviewers);
+
+        return members.stream().collect(Collectors.toMap(
+                m -> m.getProject().getProjectId() + "_" + m.getUser().getId(),
+                m -> m,
+                (existing, replacement) -> existing
+        ));
     }
 
     // 후기 작성 가능 여부 검증
