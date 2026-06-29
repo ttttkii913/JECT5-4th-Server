@@ -8,6 +8,7 @@ import com.sossbar.projects.enums.MemberStatus;
 import com.sossbar.projects.enums.ProjectStatus;
 import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.projects.repository.ProjectRepository;
+import com.sossbar.review.repository.ReviewRepository;
 import com.sossbar.user.entity.User;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class ProjectMemberService {
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     // 팀원 초대
     @Transactional
@@ -42,8 +44,8 @@ public class ProjectMemberService {
                 .project(project)
                 .user(user)
                 .memberStatus(MemberStatus.MEMBER)
-                .projectPosition(null)
-                .projectDetailPosition(null)
+                .projectPosition1(null)
+                .projectPosition2(null)
                 .build();
 
         projectMemberRepository.save(projectMember);
@@ -55,6 +57,14 @@ public class ProjectMemberService {
         User loginUser = getLoginUser(principal);
         Long loginUserId = loginUser.getId();
         Project project = getProjectById(projectId);
+
+        // 팀 확정 이후에는 팀원 삭제 불가 = IN_PROGRESS 상태만 가능
+        if (project.getProjectStatus() != ProjectStatus.IN_PROGRESS) {
+            throw new BusinessException(
+                    ErrorCode.INVALID_PROJECT_STATUS_EXCEPTION,
+                    "팀이 확정된 프로젝트는 팀원을 내보낼 수 없습니다. (projectId: " + projectId + ")"
+            );
+        }
 
         ProjectMember projectMember = projectMemberRepository.findByProjectAndUser(project, loginUser)
                 .orElseThrow(() -> new BusinessException(
@@ -113,8 +123,23 @@ public class ProjectMemberService {
         }
 
         project.updateProjectStatus(ProjectStatus.COMPLETED);
+        updateProjectStatus(project);
     }
 
+    private void updateProjectStatus(Project project) {
+        // 팀 확정 상태에서만 체크
+        if (project.getProjectStatus() != ProjectStatus.COMPLETED) {
+            return;
+        }
+
+        long memberCount = projectMemberRepository.countByProject(project);
+        long reviewCount = reviewRepository.countByProject(project);
+        long totalReviewCount = (long) memberCount * (memberCount - 1);
+
+        if (reviewCount == totalReviewCount) {
+            project.updateProjectStatus(ProjectStatus.ARCHIVED);
+        }
+    }
     // 공통 메소드
     private User getLoginUser(Principal principal) {
         Long userId = Long.parseLong(principal.getName());

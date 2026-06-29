@@ -3,11 +3,13 @@ package com.sossbar.projects.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
+import com.sossbar.user.entity.UserLinkType;
 import com.sossbar.user.entity.UserPosition;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -19,10 +21,15 @@ public class PublicProjectResponse {
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startDate;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime endDate;
+
     private String projectImage;
 
-    private UserPosition projectPosition;
-    private String projectDetailPosition;
+    private List<UserPosition> projectPositions;
+
+    private String projectUrl;
+    private UserLinkType projectUrlType;
 
     public static PublicProjectResponse from(ProjectMember pm) {
 
@@ -32,10 +39,12 @@ public class PublicProjectResponse {
                 .projectId(project.getProjectId())
                 .projectName(project.getProjectName())
                 .host(project.getHost())
-                .startDate(project.getCreatedAt())
+                .startDate(project.getStartDate())
+                .endDate(project.getEndDate())
                 .projectImage(project.getProjectImage())
-                .projectPosition(pm.getProjectPosition())
-                .projectDetailPosition(pm.getProjectDetailPosition())
+                .projectPositions(pm.getProjectPositions())
+                .projectUrl(project.getProjectUrl())
+                .projectUrlType(project.getProjectUrlType())
                 .build();
     }
 }

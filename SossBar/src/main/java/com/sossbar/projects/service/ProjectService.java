@@ -5,7 +5,6 @@ import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.projects.dto.request.ProjectCreateRequest;
 import com.sossbar.projects.dto.request.ProjectUpdateRequest;
 import com.sossbar.projects.dto.response.MyProjectResponse;
-import com.sossbar.projects.dto.response.ProjectMemberResponse;
 import com.sossbar.projects.dto.response.ProjectResponse;
 import com.sossbar.projects.dto.response.PublicProjectResponse;
 import com.sossbar.projects.entity.Project;
@@ -22,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +44,10 @@ public class ProjectService {
         // 1. 요청자 조회
         User user = getLoginUser(principal);
 
-        // 2. 프로젝트 저장
+        // 2. 시작, 종료 기간 검증
+        validateProjectPeriod(request.getStartDate(), request.getEndDate());
+
+        // 3. 프로젝트 저장
         String projectLink = UUID.randomUUID().toString();
         Project project = Project.builder()
                 .projectName(request.getProjectName())
@@ -52,16 +55,20 @@ public class ProjectService {
                 .projectLink(projectLink)
                 .projectImage(imageUrl)
                 .projectStatus(ProjectStatus.IN_PROGRESS)
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .projectUrl(request.getProjectUrl())
+                .projectUrlType(request.getProjectUrlType())
                 .build();
         projectRepository.save(project);
 
-        // 3. 생성자를 LEADER로 ProjectMember에 저장
+        // 4. 생성자를 LEADER로 ProjectMember에 저장
         ProjectMember projectMember = ProjectMember.builder()
                 .user(user)
                 .project(project)
                 .memberStatus(MemberStatus.LEADER)
-                .projectPosition(null)
-                .projectDetailPosition(null)
+                .projectPosition1(null)
+                .projectPosition2(null)
                 .build();
         projectMemberRepository.save(projectMember);
 
@@ -153,7 +160,26 @@ public class ProjectService {
     @Transactional
     public ProjectResponse updateProject(Long projectId, ProjectUpdateRequest request, String newImageUrl, Principal principal) {
         Project project = getProjectById(projectId);
-        project.update(request.getProjectName(), request.getHost(), newImageUrl);
+
+        // 기간 검증
+        LocalDateTime startDate = request.getStartDate() != null
+                ? request.getStartDate()
+                : project.getStartDate();
+
+        LocalDateTime endDate = request.getEndDate() != null
+                ? request.getEndDate()
+                : project.getEndDate();
+
+        validateProjectPeriod(startDate, endDate);
+
+        project.update(
+                request.getProjectName(),
+                request.getHost(),
+                newImageUrl,
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getProjectUrl(),
+                request.getProjectUrlType());
 
         User loginUser = getLoginUser(principal);
 
@@ -197,5 +223,14 @@ public class ProjectService {
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION,
                         ErrorCode.PROJECT_NOT_FOUND_EXCEPTION.getMessage() + projectId));
+    }
+
+    private void validateProjectPeriod(LocalDateTime startDate, LocalDateTime endDate) {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new BusinessException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "프로젝트 시작일은 종료일보다 이후일 수 없습니다."
+            );
+        }
     }
 }

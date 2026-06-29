@@ -2,6 +2,7 @@ package com.sossbar.projects.entity;
 
 import com.sossbar.global.common.template.BaseTimeEntity;
 import com.sossbar.projects.enums.ProjectStatus;
+import com.sossbar.user.entity.UserLinkType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,11 +37,27 @@ public class Project extends BaseTimeEntity {
     @Column(name = "project_status", nullable = false)
     private ProjectStatus projectStatus; // 프로젝트 진행 상황
 
+    @Column(name = "start_date")
+    private LocalDateTime startDate;     // 프로젝트 시작 날짜
+
+    @Column(name = "end_date")
+    private LocalDateTime endDate;       // 프로젝트 종료 날짜
+
+    @Column(name = "project_url")
+    private String projectUrl;           // 프로젝트 url e.g. github
+
+    @Enumerated(EnumType.STRING)
+    private UserLinkType projectUrlType; // url type e.g. link, behence ...
+
     // 프로젝트 수정 메서드
-    public void update(String projectName, String host, String projectImage) {
+    public void update(String projectName, String host, String projectImage, LocalDateTime startDate, LocalDateTime endDate, String projectUrl, UserLinkType projectUrlType) {
         if (projectName != null) this.projectName = projectName;
         if (host != null) this.host = host;
         if (projectImage != null) this.projectImage = projectImage;
+        if (startDate != null) this.startDate = startDate;
+        if (endDate != null) this.endDate = endDate;
+        if (projectUrl != null) this.projectUrl = projectUrl;
+        if (projectUrlType != null) this.projectUrlType = projectUrlType;
     }
 
     // 프로젝트 상태 변경 메서드

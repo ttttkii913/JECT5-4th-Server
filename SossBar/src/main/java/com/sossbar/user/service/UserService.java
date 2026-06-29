@@ -43,6 +43,14 @@ public class UserService {
         Long id = Long.parseLong(principal.getName());
         User user = getUserById(id);
 
+        // 온보딩 마케팅 동의 false 불가 예외
+        if (!userInfoUpdateReqDto.marketingAgree()) {
+            throw new BusinessException(
+                    ErrorCode.VALIDATION_ERROR,
+                    "온보딩 시 마케팅 동의는 필수입니다."
+            );
+        }
+
         // 이미 온보딩 완료된 경우 예외
         if (user.getUsername() != null) {
             throw new BusinessException(
@@ -59,13 +67,13 @@ public class UserService {
             );
         }
 
-        // 직군 ETC 선택시 직접 직군 입력
-        if (userInfoUpdateReqDto.defaultPosition() == UserPosition.ETC
-                && (userInfoUpdateReqDto.defaultDetailPosition() == null
-                || userInfoUpdateReqDto.defaultDetailPosition().isBlank())) {
+        List<UserPosition> positions = userInfoUpdateReqDto.defaultPositions();
+
+        if (positions == null || positions.isEmpty() || positions.size() > 2) {
             throw new BusinessException(
                     ErrorCode.VALIDATION_ERROR,
-                    "직군을 입력해 주세요.");
+                    "직군은 최대 2개까지만 선택할 수 있습니다."
+            );
         }
 
         // 아무것도 보내지 않으면 초기 이미지는 null로

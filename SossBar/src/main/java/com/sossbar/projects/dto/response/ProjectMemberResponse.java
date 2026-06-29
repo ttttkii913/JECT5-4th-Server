@@ -6,6 +6,8 @@ import com.sossbar.user.entity.UserPosition;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 public class ProjectMemberResponse {
@@ -19,8 +21,7 @@ public class ProjectMemberResponse {
     @Builder.Default
     private boolean reviewWritten = false;
 
-    private UserPosition projectPosition;
-    private String projectDetailPosition;
+    private List<UserPosition> projectPositions;
 
     public static ProjectMemberResponse from(ProjectMember pm) {
         return ProjectMemberResponse.builder()
@@ -29,8 +30,7 @@ public class ProjectMemberResponse {
                 .username(pm.getUser().getUsername())
                 .profileImageUrl(pm.getUser().getProfileImageUrl())
                 .memberStatus(pm.getMemberStatus())
-                .projectPosition(pm.getProjectPosition())
-                .projectDetailPosition(pm.getProjectDetailPosition())
+                .projectPositions(pm.getProjectPositions())
                 .build();
     }
 
@@ -45,8 +45,7 @@ public class ProjectMemberResponse {
                 .profileImageUrl(pm.getUser().getProfileImageUrl())
                 .memberStatus(pm.getMemberStatus())
                 .reviewWritten(reviewWritten)
-                .projectPosition(pm.getProjectPosition())
-                .projectDetailPosition(pm.getProjectDetailPosition())
+                .projectPositions(pm.getProjectPositions())
                 .build();
     }
 }

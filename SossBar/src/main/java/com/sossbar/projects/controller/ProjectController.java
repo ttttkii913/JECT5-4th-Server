@@ -54,7 +54,7 @@ public class ProjectController {
     }
 
     @Operation(summary = "프로젝트 상세 조회", description = "프로젝트 ID로 단일 프로젝트를 조회하는 API입니다.")
-    @GetMapping("/{projectId:\\d+}")
+    @GetMapping("/{projectId}")
     public ApiResTemplate<ProjectResponse> getProject(
             @PathVariable Long projectId,
             Principal principal
