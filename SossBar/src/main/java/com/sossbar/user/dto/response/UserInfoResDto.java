@@ -15,8 +15,7 @@ public record UserInfoResDto(
         String bio,
         String profileImageUrl,
         UserType userType,
-        UserPosition defaultPosition,
-        String defaultDetailPosition,
+        List<UserPosition> defaultPositions,
         List<UserLinkResDto> links,
         boolean marketingAgree
 
@@ -29,8 +28,7 @@ public record UserInfoResDto(
                 .bio(user.getBio())
                 .profileImageUrl(user.getProfileImageUrl())
                 .userType(user.getUserType())
-                .defaultPosition(user.getDefaultPosition())
-                .defaultDetailPosition(user.getDefaultDetailPosition())
+                .defaultPositions(user.getDefaultPositions())
                 .links(user.getLinks().stream().map(UserLinkResDto::from).toList())
                 .marketingAgree(user.isMarketingAgree())
                 .build();

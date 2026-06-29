@@ -46,13 +46,13 @@ public class UserProfileService {
             newProfileImageUrl = uploadedImageUrl;
         }
 
-        // 직군 ETC 선택시 직접 직군 입력
-        if (userInfoUpdateReqDto.defaultPosition() == UserPosition.ETC
-                && (userInfoUpdateReqDto.defaultDetailPosition() == null
-                || userInfoUpdateReqDto.defaultDetailPosition().isBlank())) {
+        List<UserPosition> positions = userInfoUpdateReqDto.defaultPositions();
+
+        if (positions == null || positions.isEmpty() || positions.size() > 2) {
             throw new BusinessException(
                     ErrorCode.VALIDATION_ERROR,
-                    "직군을 입력해 주세요.");
+                    "직군은 최대 2개까지만 선택할 수 있습니다."
+            );
         }
 
         // 프로필 수정에서도 link 수정

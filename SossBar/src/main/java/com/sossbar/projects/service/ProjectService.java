@@ -5,7 +5,6 @@ import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.projects.dto.request.ProjectCreateRequest;
 import com.sossbar.projects.dto.request.ProjectUpdateRequest;
 import com.sossbar.projects.dto.response.MyProjectResponse;
-import com.sossbar.projects.dto.response.ProjectMemberResponse;
 import com.sossbar.projects.dto.response.ProjectResponse;
 import com.sossbar.projects.dto.response.PublicProjectResponse;
 import com.sossbar.projects.entity.Project;
@@ -52,6 +51,10 @@ public class ProjectService {
                 .projectLink(projectLink)
                 .projectImage(imageUrl)
                 .projectStatus(ProjectStatus.IN_PROGRESS)
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .projectUrl(request.getProjectUrl())
+                .projectUrlType(request.getProjectUrlType())
                 .build();
         projectRepository.save(project);
 
@@ -60,8 +63,8 @@ public class ProjectService {
                 .user(user)
                 .project(project)
                 .memberStatus(MemberStatus.LEADER)
-                .projectPosition(null)
-                .projectDetailPosition(null)
+                .projectPosition1(null)
+                .projectPosition2(null)
                 .build();
         projectMemberRepository.save(projectMember);
 
@@ -153,7 +156,14 @@ public class ProjectService {
     @Transactional
     public ProjectResponse updateProject(Long projectId, ProjectUpdateRequest request, String newImageUrl, Principal principal) {
         Project project = getProjectById(projectId);
-        project.update(request.getProjectName(), request.getHost(), newImageUrl);
+        project.update(
+                request.getProjectName(),
+                request.getHost(),
+                newImageUrl,
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getProjectUrl(),
+                request.getProjectUrlType());
 
         User loginUser = getLoginUser(principal);
 

@@ -32,8 +32,9 @@ public class User extends BaseTimeEntity {
     private UserType userType;
 
     @Enumerated(EnumType.STRING)
-    private UserPosition defaultPosition;
-    private String defaultDetailPosition;
+    private UserPosition defaultPosition1;
+    @Enumerated(EnumType.STRING)
+    private UserPosition defaultPosition2;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserLink> links = new ArrayList<>();
@@ -43,17 +44,17 @@ public class User extends BaseTimeEntity {
     @Column(name = "user_info_delete")
     private boolean isDeleted = false;
 
-    private boolean marketingAgree = false;
+    private boolean marketingAgree = true;
 
     @Builder
-    public User(String username, String email, String bio, String profileImageUrl, UserType userType, UserPosition defaultPosition, String defaultDetailPosition, String refreshToken, boolean marketingAgree) {
+    public User(String username, String email, String bio, String profileImageUrl, UserType userType, UserPosition defaultPosition1, UserPosition defaultPosition2, String refreshToken, boolean marketingAgree) {
         this.username = username;
         this.email = email;
         this.bio = bio;
         this.profileImageUrl = profileImageUrl;
         this.userType = userType;
-        this.defaultPosition = defaultPosition;
-        this.defaultDetailPosition = defaultDetailPosition;
+        this.defaultPosition1 = defaultPosition1;
+        this.defaultPosition2 = defaultPosition2;
         this.refreshToken = refreshToken;
         this.marketingAgree = marketingAgree;
     }
@@ -71,12 +72,8 @@ public class User extends BaseTimeEntity {
             this.profileImageUrl = profileImageUrl;
         }
 
-        if (userInfoUpdateReqDto.defaultPosition() != null) {
-            this.defaultPosition = userInfoUpdateReqDto.defaultPosition();
-            this.defaultDetailPosition =
-                    userInfoUpdateReqDto.defaultPosition() == UserPosition.ETC
-                            ? userInfoUpdateReqDto.defaultDetailPosition()
-                            : null;
+        if (userInfoUpdateReqDto.defaultPositions() != null) {
+            updateDefaultPositions(userInfoUpdateReqDto.defaultPositions());
         }
 
         if (newLinks != null) {
@@ -99,7 +96,26 @@ public class User extends BaseTimeEntity {
         this.isDeleted = true;
     }
 
+    public List<UserPosition> getDefaultPositions() {
+        List<UserPosition> positions = new ArrayList<>();
+
+        if (defaultPosition1 != null) {
+            positions.add(defaultPosition1);
+        }
+
+        if (defaultPosition2 != null) {
+            positions.add(defaultPosition2);
+        }
+
+        return positions;
+    }
+
     public void updateMarketingAgree(boolean marketingAgree) {
         this.marketingAgree = marketingAgree;
+    }
+
+    public void updateDefaultPositions(List<UserPosition> positions) {
+        this.defaultPosition1 = positions.get(0);
+        this.defaultPosition2 = positions.size() > 1 ? positions.get(1) : null;
     }
 }
