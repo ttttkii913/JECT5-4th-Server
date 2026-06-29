@@ -146,8 +146,7 @@ public class ProjectMemberService {
         }
 
         long memberCount = projectMemberRepository.countByProjectAndIsBannedFalse(project);
-        long reviewCount = reviewRepository.countByProject(project);
-        long totalReviewCount = (long) memberCount * (memberCount - 1);
+        long reviewCount = reviewRepository.countActiveMemberReviews(project);        long totalReviewCount = (long) memberCount * (memberCount - 1);
 
         if (reviewCount == totalReviewCount) {
             project.updateProjectStatus(ProjectStatus.ARCHIVED);

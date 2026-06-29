@@ -36,4 +36,5 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
 
     Optional<ProjectMember> findFirstByProjectAndUser_IdNotAndUser_IsDeletedFalseOrderByCreatedAtAsc(Project project, Long userId);
 
-    long countByProjectAndIsBannedFalse(Project project);}
+    long countByProjectAndIsBannedFalse(Project project);
+}

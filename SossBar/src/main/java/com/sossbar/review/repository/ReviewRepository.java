@@ -18,16 +18,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // 중복 후기 검증
     boolean existsByReviewerAndRevieweeAndProject(User reviewer, User reviewee, Project project);
 
-    // 사용자가 받은 후기 목록 (프로젝트 생성 날짜 기준 내림차순)
-    @Query("""
-        SELECT r 
-        FROM Review r
-        JOIN FETCH r.project 
-        WHERE r.reviewee.id = :userId
-        ORDER BY r.project.createdAt DESC
-        """)
-    List<Review> findAllByRevieweeId(@Param("userId") Long userId);
-
     @Query("SELECT r.reviewee.id FROM Review r WHERE r.reviewer.id = :reviewerId AND r.project.id = :projectId")
     Set<Long> findRevieweeIdsByReviewerIdAndProjectId(@Param("reviewerId") Long reviewerId, @Param("projectId") Long projectId);
 
@@ -58,5 +48,22 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             @Param("cursor") Long cursor,
             Pageable pageable);
 
-    long countByProject(Project project);
+    @Query("""
+select count(r)
+from Review r
+where r.project = :project
+  and r.reviewer.id in (
+      select pm.user.id
+      from ProjectMember pm
+      where pm.project = :project
+        and pm.isBanned = false
+  )
+  and r.reviewee.id in (
+      select pm.user.id
+      from ProjectMember pm
+      where pm.project = :project
+        and pm.isBanned = false
+  )
+""")
+    long countActiveMemberReviews(@Param("project") Project project);
 }

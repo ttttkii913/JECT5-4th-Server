@@ -39,7 +39,7 @@ public class ReviewController {
     @GetMapping("/api/v1/users/{userLink}/reviews")
     public ApiResTemplate<ReviewCursorResDto> getReviews(
             Principal principal,
-            @PathVariable String userLink,
+            @PathVariable("userLink") String userLink,
             @RequestParam(required = false) Long cursor,
             @RequestParam(defaultValue = "5") int size
     ) {
@@ -51,7 +51,7 @@ public class ReviewController {
     @GetMapping("/api/v1/users/{userLink}/projects/{projectId}/reviews")
     public ApiResTemplate<List<CommonReviewResDto>> getReviewsByProject(
             Principal principal,
-            @PathVariable String userLink,
+            @PathVariable("userLink") String userLink,
             @PathVariable Long projectId
     ) {
         List<CommonReviewResDto> reviews = reviewService.getReviewsByProject(principal, userLink, projectId);

@@ -46,6 +46,8 @@ public class User extends BaseTimeEntity {
     private boolean isDeleted = false;
 
     private boolean marketingAgree = true;
+
+    @Column(unique = true)
     private String userLink;
 
     @Builder
