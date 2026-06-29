@@ -87,7 +87,6 @@ public class ReviewService {
         List<UserPosition> positions = reviewReqDto.getProjectPositions();
 
         if (projectMember.getProjectPosition1() == null) {
-
             if (positions == null || positions.isEmpty() || positions.size() > 2) {
                 throw new BusinessException(
                         ErrorCode.VALIDATION_ERROR,
