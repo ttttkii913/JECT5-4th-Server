@@ -4,6 +4,7 @@ import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
+import com.sossbar.projects.enums.ProjectStatus;
 import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
@@ -83,23 +84,18 @@ public class ReviewService {
                                 ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
                         ));
 
-        // 이미 직군을 입력했다면 기존 직군 사용, 없을 때만 새로 등록 및 dto에서 보낸 값은 무시
-        if (projectMember.getProjectPosition() == null) {
-            // 직군 etc valid
-            if (reviewReqDto.getProjectPosition() == UserPosition.ETC
-                    && (reviewReqDto.getProjectDetailPosition() == null
-                    || reviewReqDto.getProjectDetailPosition().isBlank())) {
+        List<UserPosition> positions = reviewReqDto.getProjectPositions();
 
+        if (projectMember.getProjectPosition1() == null) {
+
+            if (positions == null || positions.isEmpty() || positions.size() > 2) {
                 throw new BusinessException(
                         ErrorCode.VALIDATION_ERROR,
-                        "직군을 입력해 주세요."
+                        "직군은 최대 2개까지만 선택할 수 있습니다."
                 );
             }
-            // 프로젝트 직군 저장 - 최초 1회만
-            projectMember.updateProjectPosition(
-                    reviewReqDto.getProjectPosition(),
-                    reviewReqDto.getProjectDetailPosition()
-            );
+
+            projectMember.updateProjectPosition(positions);
         }
 
         Review savedReview = reviewRepository.save(reviewReqDto.toEntity(reviewer, reviewee, project));
@@ -147,6 +143,7 @@ public class ReviewService {
                         .collect(Collectors.toList());
 
         reviewSpectrumRepository.saveAll(reviewSpectrums);
+        updateProjectStatus(project);
 
         return ReviewCreateResDto.from(savedReview, reviewTags, reviewSpectrums);
     }
@@ -195,6 +192,11 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public List<CommonReviewResDto> getReviewsByProject(Principal principal, Long userId, Long projectId) {
         Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
+
+        // 후기 열람 가능 여부 검증
+        Project project = getProject(projectId);
+        validateReviewOpen(project);
+
         List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(userId, projectId);
 
         Map<String, ProjectMember> projectMemberMap = getProjectMemberMap(reviews);
@@ -224,6 +226,41 @@ public class ReviewService {
                 m -> m,
                 (existing, replacement) -> existing
         ));
+    }
+
+    // 후기 열람 관련 검증 메소드
+    private void validateReviewOpen(Project project) {
+        if (project.getProjectStatus() == ProjectStatus.IN_PROGRESS) {
+            throw new BusinessException(
+                    ErrorCode.REVIEW_NOT_OPEN_EXCEPTION,
+                    "팀이 확정된 후에 후기를 열람할 수 있습니다."
+            );
+        }
+        if (project.getProjectStatus() == ProjectStatus.COMPLETED) {
+            throw new BusinessException(
+                    ErrorCode.REVIEW_NOT_OPEN_EXCEPTION,
+                    "모든 팀원의 후기 작성이 완료된 후 열람할 수 있습니다."
+            );
+        }
+    }
+
+    private void updateProjectStatus(Project project) {
+        // 팀 확정 상태에서만 체크
+        if (project.getProjectStatus() != ProjectStatus.COMPLETED) {
+            return;
+        }
+
+        if (isAllReviewCompleted(project)) {
+            project.updateProjectStatus(ProjectStatus.ARCHIVED);
+        }
+    }
+
+    private boolean isAllReviewCompleted(Project project) {
+        int memberCount = projectMemberRepository.findAllByProject(project).size();
+        long reviewCount = reviewRepository.countByProject(project);
+        long totalReviewCount = (long) memberCount * (memberCount - 1);
+
+        return reviewCount == totalReviewCount;
     }
 
     // 후기 작성 가능 여부 검증
