@@ -3,6 +3,7 @@ package com.sossbar.review_profile.service;
 import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.projects.entity.Project;
+import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.repository.ReviewSpectrumRepository;
 import com.sossbar.review.repository.ReviewTagRepository;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,13 +29,16 @@ public class ReviewProfileService {
     private final ReviewSpectrumRepository reviewSpectrumRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
     // 1. 태그 전체 조회
     public TagListResDto getAllTags(String userLink) {
         User user = getUserById(userLink);
         List<TagInfoResDto> allTags = reviewTagRepository.findTagStatisticsByUser(user);
 
-        return TagListResDto.from(allTags);
+        LocalDateTime modifiedAt = projectMemberRepository.findLastArchivedProjectModifiedAtByUser(user);
+
+        return TagListResDto.from(allTags, modifiedAt);
     }
 
     // 2. 태그 프로젝트별 조회
@@ -43,7 +48,9 @@ public class ReviewProfileService {
 
         List<TagInfoResDto> allTags = reviewTagRepository.findTagStatisticsByUserAndProject(user, project);
 
-        return TagListResDto.from(allTags);
+        LocalDateTime modifiedAt = project.getModifiedAt();
+
+        return TagListResDto.from(allTags, modifiedAt);
     }
 
     // 3. 스펙트럼 전체 조회
@@ -52,8 +59,9 @@ public class ReviewProfileService {
 
         Long totalCount = reviewSpectrumRepository.countSpectrumParticipantsByUser(user);
         List<SpectrumInfoResDto> spectrums = reviewSpectrumRepository.findSpectrumStatisticsByUser(user);
+        LocalDateTime modifiedAt = projectMemberRepository.findLastArchivedProjectModifiedAtByUser(user);
 
-        return SpectrumListResDto.from(totalCount, spectrums);
+        return SpectrumListResDto.from(totalCount, spectrums, modifiedAt);
     }
 
     // 4. 스펙트럼 프로젝트별 조회
@@ -64,7 +72,9 @@ public class ReviewProfileService {
         Long totalCount = reviewSpectrumRepository.countSpectrumParticipantsByUserAndProject(user, project);
         List<SpectrumInfoResDto> spectrums = reviewSpectrumRepository.findSpectrumStatisticsByUserAndProject(user, project);
 
-        return SpectrumListResDto.from(totalCount, spectrums);
+        LocalDateTime modifiedAt = project.getModifiedAt();
+
+        return SpectrumListResDto.from(totalCount, spectrums, modifiedAt);
     }
 
     // entity 찾는 공통 메소드

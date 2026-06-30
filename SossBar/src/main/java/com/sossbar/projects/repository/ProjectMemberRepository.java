@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,4 +42,14 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     Optional<ProjectMember> findFirstByProjectAndUser_IdNotAndUser_IsDeletedFalseOrderByCreatedAtAsc(Project project, Long userId);
 
     long countByProjectAndIsBannedFalse(Project project);
+
+    @Query("""
+    SELECT MAX(pm.project.modifiedAt)
+    FROM ProjectMember pm
+    WHERE pm.user = :user
+      AND pm.project.projectStatus = com.sossbar.projects.enums.ProjectStatus.ARCHIVED
+""")
+    LocalDateTime findLastArchivedProjectModifiedAtByUser(
+            @Param("user") User user
+    );
 }
