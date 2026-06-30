@@ -30,6 +30,8 @@ public class PublicProjectResponse {
 
     private String projectUrl;
     private UserLinkType projectUrlType;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
 
     public static PublicProjectResponse from(ProjectMember pm) {
 
@@ -45,6 +47,7 @@ public class PublicProjectResponse {
                 .projectPositions(pm.getProjectPositions())
                 .projectUrl(project.getProjectUrl())
                 .projectUrlType(project.getProjectUrlType())
+                .createdAt(project.getCreatedAt())
                 .build();
     }
 }

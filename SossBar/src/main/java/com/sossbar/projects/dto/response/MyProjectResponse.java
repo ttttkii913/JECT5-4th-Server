@@ -38,6 +38,8 @@ public class MyProjectResponse {
 
     private int reviewedCount;
     private int totalReviewTargetCount;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
 
     public static MyProjectResponse from(
             ProjectMember myMembership,
@@ -77,6 +79,7 @@ public class MyProjectResponse {
                 .projectUrlType(project.getProjectUrlType())
                 .reviewedCount(reviewedUserIds.size())
                 .totalReviewTargetCount(otherMembers.size())
+                .createdAt(project.getCreatedAt())
                 .build();
     }
 }

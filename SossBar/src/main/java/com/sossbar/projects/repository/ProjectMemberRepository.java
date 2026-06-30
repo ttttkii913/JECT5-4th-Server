@@ -3,6 +3,7 @@ package com.sossbar.projects.repository;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.user.entity.User;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,9 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
     List<ProjectMember> findAllByProject(@Param("project") Project project);
 
     @Query("select pm from ProjectMember pm join fetch pm.project where pm.user = :user  and pm.user.isDeleted = false and pm.isBanned = false")
+    List<ProjectMember> findAllByUser(@Param("user") User user, Sort sort);
+
+    @Query("select pm from ProjectMember pm join fetch pm.project where pm.user = :user  and pm.user.isDeleted = false")
     List<ProjectMember> findAllByUser(@Param("user") User user);
 
     @Query("select pm from ProjectMember pm join fetch pm.user u where pm.project in :projects and u.isDeleted = false and pm.isBanned = false")
