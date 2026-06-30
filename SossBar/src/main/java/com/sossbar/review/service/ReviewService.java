@@ -5,6 +5,7 @@ import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.projects.enums.ProjectStatus;
+import com.sossbar.projects.enums.SortType;
 import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
@@ -28,6 +29,7 @@ import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -150,7 +152,7 @@ public class ReviewService {
 
     // 전체 후기 조회
     @Transactional(readOnly = true)
-    public ReviewCursorResDto getReviews(Principal principal, String userLink, Long cursor, int size) {
+    public ReviewCursorResDto getReviews(Principal principal, String userLink, Long cursor, int size, SortType sort) {
         // 페이지가 1 미만이면 오류 발생
         if (size < 1) throw new BusinessException(ErrorCode.INVALID_PAGE_SIZE_EXCEPTION, "");
 
@@ -160,7 +162,10 @@ public class ReviewService {
         Pageable pageable = PageRequest.of(0, size + 1);
 
         User reviewee = getUserByLink(userLink);
-        List<Review> reviews = reviewRepository.findByRevieweeIdWithCursor(reviewee.getId(), cursor, pageable);
+        List<Review> reviews =
+                sort == SortType.LATEST
+                ? reviewRepository.findByRevieweeIdWithCursorDesc(reviewee.getId(), cursor, pageable)
+                : reviewRepository.findByRevieweeIdWithCursorDesc(reviewee.getId(), cursor, pageable);
 
         boolean hasNext = reviews.size() > size;
         if(hasNext) reviews = reviews.subList(0, size);
@@ -192,15 +197,19 @@ public class ReviewService {
 
     // 프로젝트별 후기 조회
     @Transactional(readOnly = true)
-    public List<CommonReviewResDto> getReviewsByProject(Principal principal, String userLink, Long projectId) {
+    public List<CommonReviewResDto> getReviewsByProject(Principal principal, String userLink, Long projectId, SortType sort) {
         Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
 
         // 후기 열람 가능 여부 검증
         Project project = getProject(projectId);
         validateReviewOpen(project);
 
+        Sort sortOption = sort == SortType.LATEST
+                ? Sort.by(Sort.Direction.DESC, "createdAt")
+                : Sort.by(Sort.Direction.ASC, "createdAt");
+
         User reviewee = getUserByLink(userLink);
-        List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(reviewee.getId(), projectId);
+        List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(reviewee.getId(), projectId, sortOption);
 
         Map<String, ProjectMember> projectMemberMap = getProjectMemberMap(reviews);
 

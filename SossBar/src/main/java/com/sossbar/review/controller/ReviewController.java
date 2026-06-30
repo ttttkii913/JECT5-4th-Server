@@ -2,6 +2,7 @@ package com.sossbar.review.controller;
 
 import com.sossbar.global.common.code.SuccessCode;
 import com.sossbar.global.common.template.ApiResTemplate;
+import com.sossbar.projects.enums.SortType;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
 import com.sossbar.review.dto.response.CommonReviewResDto;
 import com.sossbar.review.dto.response.ReviewCreateResDto;
@@ -41,9 +42,10 @@ public class ReviewController {
             Principal principal,
             @PathVariable("userLink") String userLink,
             @RequestParam(required = false) Long cursor,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "LATEST") SortType sort
     ) {
-        ReviewCursorResDto reviews = reviewService.getReviews(principal, userLink, cursor, size);
+        ReviewCursorResDto reviews = reviewService.getReviews(principal, userLink, cursor, size, sort);
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, reviews);
     }
 
@@ -52,9 +54,10 @@ public class ReviewController {
     public ApiResTemplate<List<CommonReviewResDto>> getReviewsByProject(
             Principal principal,
             @PathVariable("userLink") String userLink,
-            @PathVariable Long projectId
+            @PathVariable Long projectId,
+            @RequestParam(defaultValue = "LATEST") SortType sort
     ) {
-        List<CommonReviewResDto> reviews = reviewService.getReviewsByProject(principal, userLink, projectId);
+        List<CommonReviewResDto> reviews = reviewService.getReviewsByProject(principal, userLink, projectId, sort);
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, reviews);
     }
 
