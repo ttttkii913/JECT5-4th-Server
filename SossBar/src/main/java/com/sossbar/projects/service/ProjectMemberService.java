@@ -141,7 +141,7 @@ public class ProjectMemberService {
                 members,
                 NotificationType.TEAM_COMPLETED,
                 "팀이 확정되었어요",
-                project.getProjectName() + "후기를 작성해 보세요"
+                project.getProjectName() + " 후기를 작성해 보세요"
         );
     }
 

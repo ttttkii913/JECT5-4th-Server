@@ -7,7 +7,6 @@ import com.sossbar.notification.entity.Notification;
 import com.sossbar.notification.entity.NotificationType;
 import com.sossbar.notification.repository.NotificationRepository;
 import com.sossbar.user.entity.User;
-import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +19,14 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final UserRepository userRepository;
 
     // 알림 발송 (팀 확정 & 팀원 합류)
     @Transactional
     public void sendNotification(List<User> receivers, NotificationType notificationType, String title, String body) {
+        if (receivers == null || receivers.isEmpty()) {
+            return;
+        }
+
         List<Notification> notifications = receivers.stream()
                 .map(receiver -> Notification.builder()
                         .receiver(receiver)

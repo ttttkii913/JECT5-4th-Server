@@ -36,8 +36,13 @@ public class Notification {
     @Column(nullable = false)
     private boolean isRead = false;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 
     @Builder
     public Notification(User receiver, NotificationType notificationType, String title, String body) {

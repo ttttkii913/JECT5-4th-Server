@@ -23,7 +23,7 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @Operation(summary = "내 알림 목록 조회", description = "로그인한 사용자가 알림 목록을 조회할 수 있습니다.")
-    @GetMapping("api/v1/notifications/all")
+    @GetMapping("/api/v1/notifications/all")
     public ApiResTemplate<List<NotificationResDto>> getMyNotifications(Principal principal) {
         List<NotificationResDto> notifications = notificationService.getMyNotifications(principal);
 
@@ -31,7 +31,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "안 읽은 알림 개수 조회", description = "로그인한 사용자가 안 읽은 알림 개수를 조회할 수 있습니다.")
-    @GetMapping("api/v1/notifications/unread-count")
+    @GetMapping("/api/v1/notifications/unread-count")
     public ApiResTemplate<Long> getUnreadNotifications(Principal principal) {
         Long unreadCount = notificationService.getUnreadCount(principal);
 
@@ -39,7 +39,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "알림 개별 읽음 처리", description = "사용자의 개별 알림 읽음을 처리합니다.")
-    @PatchMapping("api/v1/notifications/read/{notificationId}")
+    @PatchMapping("/api/v1/notifications/read/{notificationId}")
     public ApiResTemplate<Void> markAsRead(
             @PathVariable Long notificationId,
             Principal principal
@@ -50,7 +50,7 @@ public class NotificationController {
     }
 
     @Operation(summary = "알림 전체 읽음 처리", description = "사용자의 모든 알림 읽음을 처리합니다.")
-    @PatchMapping("api/v1/notifications/read/all")
+    @PatchMapping("/api/v1/notifications/read/all")
     public ApiResTemplate<Void> markAllAsRead(Principal principal) {
         notificationService.markAllAsRead(principal);
 
