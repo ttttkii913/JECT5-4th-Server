@@ -4,6 +4,7 @@ import com.sossbar.projects.entity.Project;
 import com.sossbar.review.entity.Review;
 import com.sossbar.user.entity.User;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,7 +33,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     """)
     List<Review> findAllByRevieweeIdAndProjectProjectId(
             @Param("userId") Long userId,
-            @Param("projectId") Long projectId);
+            @Param("projectId") Long projectId,
+            Sort sort);
 
     // 페이지네이션
     @Query("""
@@ -66,4 +68,32 @@ where r.project = :project
   )
 """)
     long countActiveMemberReviews(@Param("project") Project project);
+
+    @Query("""
+    SELECT r
+    FROM Review r
+    JOIN FETCH r.project
+    WHERE r.reviewee.id = :userId
+      AND r.project.projectStatus = com.sossbar.projects.enums.ProjectStatus.ARCHIVED
+      AND (:cursor IS NULL OR r.reviewId < :cursor)
+    ORDER BY r.reviewId DESC
+    """)
+    List<Review> findByRevieweeIdWithCursorDesc(
+            @Param("userId") Long userId,
+            @Param("cursor") Long cursor,
+            Pageable pageable);
+
+    @Query("""
+    SELECT r
+    FROM Review r
+    JOIN FETCH r.project
+    WHERE r.reviewee.id = :userId
+      AND r.project.projectStatus = com.sossbar.projects.enums.ProjectStatus.ARCHIVED
+      AND (:cursor IS NULL OR r.reviewId > :cursor)
+    ORDER BY r.reviewId ASC
+    """)
+    List<Review> findByRevieweeIdWithCursorAsc(
+            @Param("userId") Long userId,
+            @Param("cursor") Long cursor,
+            Pageable pageable);
 }

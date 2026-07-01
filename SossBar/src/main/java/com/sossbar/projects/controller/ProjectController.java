@@ -8,6 +8,8 @@ import com.sossbar.projects.dto.request.ProjectUpdateRequest;
 import com.sossbar.projects.dto.response.MyProjectResponse;
 import com.sossbar.projects.dto.response.ProjectResponse;
 import com.sossbar.projects.dto.response.PublicProjectResponse;
+import com.sossbar.projects.enums.ProjectFilterType;
+import com.sossbar.projects.enums.SortType;
 import com.sossbar.projects.facade.ProjectFacade;
 import com.sossbar.projects.service.ProjectService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,14 +44,17 @@ public class ProjectController {
 
     @Operation(summary = "내 프로젝트 리스트 조회", description = "로그인한 사용자가 속한 프로젝트 목록을 조회하는 API입니다.")
     @GetMapping
-    public ApiResTemplate<List<MyProjectResponse>> getMyProjects(Principal principal) {
-        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getMyProjects(principal));
+    public ApiResTemplate<List<MyProjectResponse>> getMyProjects(Principal principal,
+                                                                 @RequestParam(defaultValue = "LATEST") SortType sort,
+                                                                 @RequestParam(defaultValue = "ALL") ProjectFilterType status) {
+        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getMyProjects(principal, sort, status));
     }
 
     @Operation(summary = "유저 프로젝트 리스트 조회", description = "특정 유저가 속한 프로젝트 목록을 조회하는 API입니다.")
     @GetMapping("/users/{userLink}")
-    public ApiResTemplate<List<PublicProjectResponse>> getUserProjects(@PathVariable("userLink") String userLink) {
-        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getUserProjects(userLink));
+    public ApiResTemplate<List<PublicProjectResponse>> getUserProjects(@PathVariable("userLink") String userLink,
+                                                                       @RequestParam(defaultValue = "LATEST") SortType sort) {
+        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getUserProjects(userLink, sort));
     }
 
     @Operation(summary = "프로젝트 상세 조회", description = "프로젝트 ID로 단일 프로젝트를 조회하는 API입니다.")
