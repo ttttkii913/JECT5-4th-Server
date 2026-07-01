@@ -40,20 +40,20 @@ public class NotificationController {
 
     @Operation(summary = "알림 개별 읽음 처리", description = "사용자의 개별 알림 읽음을 처리합니다.")
     @PatchMapping("/api/v1/notifications/read/{notificationId}")
-    public ApiResTemplate<Void> markAsRead(
+    public ApiResTemplate<Boolean> markAsRead(
             @PathVariable Long notificationId,
             Principal principal
     ) {
-        notificationService.markAsRead(principal, notificationId);
+        boolean updated = notificationService.markAsRead(principal, notificationId);
 
-        return ApiResTemplate.successResponse(SuccessCode.UPDATE_SUCCESS, null);
+        return ApiResTemplate.successResponse(SuccessCode.UPDATE_SUCCESS, updated);
     }
 
     @Operation(summary = "알림 전체 읽음 처리", description = "사용자의 모든 알림 읽음을 처리합니다.")
     @PatchMapping("/api/v1/notifications/read/all")
-    public ApiResTemplate<Void> markAllAsRead(Principal principal) {
-        notificationService.markAllAsRead(principal);
+    public ApiResTemplate<Boolean> markAllAsRead(Principal principal) {
+        boolean updated = notificationService.markAllAsRead(principal);
 
-        return ApiResTemplate.successResponse(SuccessCode.UPDATE_SUCCESS, null);
+        return ApiResTemplate.successResponse(SuccessCode.UPDATE_SUCCESS, updated);
     }
 }

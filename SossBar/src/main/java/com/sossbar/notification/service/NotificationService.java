@@ -56,7 +56,7 @@ public class NotificationService {
 
     // 개별 알림 읽음 처리
     @Transactional
-    public void markAsRead(Principal principal, Long notificationId) {
+    public boolean markAsRead(Principal principal, Long notificationId) {
         Long userId = Long.parseLong(principal.getName());
 
         Notification notification = getNotification(notificationId);
@@ -64,15 +64,22 @@ public class NotificationService {
         if (!notification.getReceiver().getId().equals(userId)) {
             throw new BusinessException(ErrorCode.NOTIFICATION_NOT_AUTHORIZED, ErrorCode.NOTIFICATION_NOT_AUTHORIZED.getMessage());
         }
+
+        if (notification.isRead()) {
+            return false; // 이미 읽은 상태면 읽음 처리 X
+        }
         notification.markAsRead();
+        return true; // 새로 읽음 처리
     }
 
     // 전체 알림 읽음 처리
     @Transactional
-    public void markAllAsRead(Principal principal) {
+    public boolean markAllAsRead(Principal principal) {
         Long userId = Long.parseLong(principal.getName());
 
-        notificationRepository.markAllAsRead(userId);
+        int updatedCount = notificationRepository.markAllAsRead(userId);
+
+        return updatedCount > 0;
     }
 
     // 엔티티 조회 공통 메서드
