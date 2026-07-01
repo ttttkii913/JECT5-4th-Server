@@ -15,4 +15,12 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
       AND p.projectStatus <> 'DELETED'
 """)
     Optional<Project> findActiveProjectById(Long projectId);
+
+    @Query("""
+    SELECT p
+    FROM Project p
+    WHERE p.projectLink = :projectLink
+      AND p.projectStatus <> 'DELETED'
+""")
+    Optional<Project> findActiveProjectByProjectLink(String projectLink);
 }

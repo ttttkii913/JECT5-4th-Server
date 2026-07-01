@@ -29,16 +29,16 @@ public class ReviewProfileService {
     private final ProjectRepository projectRepository;
 
     // 1. 태그 전체 조회
-    public TagListResDto getAllTags(Long userId) {
-        User user = getUserById(userId);
+    public TagListResDto getAllTags(String userLink) {
+        User user = getUserById(userLink);
         List<TagInfoResDto> allTags = reviewTagRepository.findTagStatisticsByUser(user);
 
         return TagListResDto.from(allTags);
     }
 
     // 2. 태그 프로젝트별 조회
-    public TagListResDto getTagsByProject(Long userId, Long projectId) {
-        User user = getUserById(userId);
+    public TagListResDto getTagsByProject(String userLink, Long projectId) {
+        User user = getUserById(userLink);
         Project project = getProjectById(projectId);
 
         List<TagInfoResDto> allTags = reviewTagRepository.findTagStatisticsByUserAndProject(user, project);
@@ -47,8 +47,8 @@ public class ReviewProfileService {
     }
 
     // 3. 스펙트럼 전체 조회
-    public SpectrumListResDto getAllSpectrums(Long userId) {
-        User user = getUserById(userId);
+    public SpectrumListResDto getAllSpectrums(String userLink) {
+        User user = getUserById(userLink);
 
         Long totalCount = reviewSpectrumRepository.countSpectrumParticipantsByUser(user);
         List<SpectrumInfoResDto> spectrums = reviewSpectrumRepository.findSpectrumStatisticsByUser(user);
@@ -57,8 +57,8 @@ public class ReviewProfileService {
     }
 
     // 4. 스펙트럼 프로젝트별 조회
-    public SpectrumListResDto getSpectrumsByProject(Long userId, Long projectId) {
-        User user = getUserById(userId);
+    public SpectrumListResDto getSpectrumsByProject(String userLink, Long projectId) {
+        User user = getUserById(userLink);
         Project project = getProjectById(projectId);
 
         Long totalCount = reviewSpectrumRepository.countSpectrumParticipantsByUserAndProject(user, project);
@@ -68,10 +68,10 @@ public class ReviewProfileService {
     }
 
     // entity 찾는 공통 메소드
-    private User getUserById(Long userId) {
-        return userRepository.findByIdAndIsDeletedFalse(userId).orElseThrow(
+    private User getUserById(String userLink) {
+        return userRepository.findByUserLinkAndIsDeletedFalse(userLink).orElseThrow(
                 () -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION,
-                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userLink));
     }
 
     private Project getProjectById(Long projectId) {

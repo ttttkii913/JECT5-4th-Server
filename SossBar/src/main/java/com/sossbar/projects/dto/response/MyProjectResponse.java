@@ -5,6 +5,7 @@ import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.projects.enums.MemberStatus;
 import com.sossbar.projects.enums.ProjectStatus;
+import com.sossbar.user.entity.UserLinkType;
 import com.sossbar.user.entity.UserPosition;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,14 +24,20 @@ public class MyProjectResponse {
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startDate;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime endDate;
     private String projectLink;
     private String projectImage;
     private ProjectStatus projectStatus;
     private MemberStatus myMemberStatus;
     private List<ProjectMemberResponse> members;
     private int memberCount;
-    private UserPosition projectPosition;
-    private String projectDetailPosition;
+    private List<UserPosition> projectPositions;
+    private String projectUrl;
+    private UserLinkType projectUrlType;
+
+    private int reviewedCount;
+    private int totalReviewTargetCount;
 
     public static MyProjectResponse from(
             ProjectMember myMembership,
@@ -53,22 +60,23 @@ public class MyProjectResponse {
                 .projectId(project.getProjectId())
                 .projectName(project.getProjectName())
                 .host(project.getHost())
-                .startDate(project.getCreatedAt())
+                .startDate(project.getStartDate())
+                .endDate(project.getEndDate())
                 .projectLink(project.getProjectLink())
                 .projectImage(project.getProjectImage())
                 .projectStatus(project.getProjectStatus())
                 .myMemberStatus(myMembership.getMemberStatus())
-                .projectPosition(
-                        myMembership.getProjectPosition() != null
-                                ? myMembership.getProjectPosition()
-                                : myMembership.getUser().getDefaultPosition()
+                .projectPositions(
+                        myMembership.getProjectPosition1() != null
+                                ? myMembership.getProjectPositions()
+                                : myMembership.getUser().getDefaultPositions()
                 )
-                .projectDetailPosition(
-                        myMembership.getProjectDetailPosition() != null
-                                ? myMembership.getProjectDetailPosition()
-                                : myMembership.getUser().getDefaultDetailPosition()
-                )                .members(members)
+                .members(members)
                 .memberCount(memberCount)
+                .projectUrl(project.getProjectUrl())
+                .projectUrlType(project.getProjectUrlType())
+                .reviewedCount(reviewedUserIds.size())
+                .totalReviewTargetCount(otherMembers.size())
                 .build();
     }
 }

@@ -20,16 +20,15 @@ import java.security.Principal;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
-@SwaggerApiResTemplate
 @Tag(name = "User Profile API", description = "사용자 프로필 관련 API")
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
 
     @Operation(summary = "사용자 프로필 정보 조회", description = "로그인한 사용자가 userId로 사용자 프로필 정보(실명, 프로필 사진, 한 줄 소개)를 조회합니다.")
-    @GetMapping("/profile/{userId}")
-    public ApiResTemplate<UserProfileInfoResDto> getUserProfile(@PathVariable("userId") Long userId) {
-        UserProfileInfoResDto userProfileInfoResDto = userProfileService.getUserProfile(userId);
+    @GetMapping("/profile/{userLink}")
+    public ApiResTemplate<UserProfileInfoResDto> getUserProfile(@PathVariable("userLink") String userLink) {
+        UserProfileInfoResDto userProfileInfoResDto = userProfileService.getUserProfile(userLink);
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, userProfileInfoResDto);
     }
 

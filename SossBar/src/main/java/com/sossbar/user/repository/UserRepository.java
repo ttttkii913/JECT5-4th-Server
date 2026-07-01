@@ -10,4 +10,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     Optional<User> findByIdAndIsDeletedFalse(Long userId);
+
+    // 사용자 고유 uuid로 조회
+    Optional<User> findByUserLinkAndIsDeletedFalse(String userLink);
 }

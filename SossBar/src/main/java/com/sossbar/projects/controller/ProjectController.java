@@ -24,7 +24,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/projects")
 @RequiredArgsConstructor
-@SwaggerApiResTemplate
 @Tag(name = "Project API", description = "프로젝트 관련 API")
 public class ProjectController {
 
@@ -48,13 +47,13 @@ public class ProjectController {
     }
 
     @Operation(summary = "유저 프로젝트 리스트 조회", description = "특정 유저가 속한 프로젝트 목록을 조회하는 API입니다.")
-    @GetMapping("/users/{userId}")
-    public ApiResTemplate<List<PublicProjectResponse>> getUserProjects(@PathVariable("userId") Long userId) {
-        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getUserProjects(userId));
+    @GetMapping("/users/{userLink}")
+    public ApiResTemplate<List<PublicProjectResponse>> getUserProjects(@PathVariable("userLink") String userLink) {
+        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getUserProjects(userLink));
     }
 
     @Operation(summary = "프로젝트 상세 조회", description = "프로젝트 ID로 단일 프로젝트를 조회하는 API입니다.")
-    @GetMapping("/{projectId:\\d+}")
+    @GetMapping("/{projectId}")
     public ApiResTemplate<ProjectResponse> getProject(
             @PathVariable Long projectId,
             Principal principal

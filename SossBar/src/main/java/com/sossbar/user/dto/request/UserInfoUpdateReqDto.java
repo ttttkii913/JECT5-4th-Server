@@ -17,10 +17,8 @@ public record UserInfoUpdateReqDto(
 
         // 직군
         @NotNull
-        UserPosition defaultPosition,
-
-        // 직군 ETC 선택 시 직접 입력
-        String defaultDetailPosition,
+        @Size(min = 1, max = 2, message = "직군은 최대 2개만 선택할 수 있습니다.")
+        List<UserPosition> defaultPositions,
 
         // 하드 스킬 링크
         @Size(max = 3, message = "링크는 최대 3개까지 등록 가능합니다.")
@@ -29,7 +27,7 @@ public record UserInfoUpdateReqDto(
         // 필수 동의 항목
         boolean requiredAgree,
 
-        // 마케팅 동의 항목
+        // 마케팅 동의 항목 => 알림 동의 항목으로 기본 true
         boolean marketingAgree
 ) {
 }

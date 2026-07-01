@@ -4,6 +4,7 @@ import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
+import com.sossbar.projects.enums.ProjectStatus;
 import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
@@ -78,28 +79,23 @@ public class ReviewService {
 
         // 프로젝트 멤버 조회
         ProjectMember projectMember = projectMemberRepository.findByProjectAndUser(project, reviewer)
-                        .orElseThrow(() -> new BusinessException(
-                                ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
-                                ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
-                        ));
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
+                ));
 
-        // 이미 직군을 입력했다면 기존 직군 사용, 없을 때만 새로 등록 및 dto에서 보낸 값은 무시
-        if (projectMember.getProjectPosition() == null) {
-            // 직군 etc valid
-            if (reviewReqDto.getProjectPosition() == UserPosition.ETC
-                    && (reviewReqDto.getProjectDetailPosition() == null
-                    || reviewReqDto.getProjectDetailPosition().isBlank())) {
+        List<UserPosition> positions = reviewReqDto.getProjectPositions();
 
+        if (projectMember.getProjectPosition1() == null) {
+
+            if (positions == null || positions.isEmpty() || positions.size() > 2) {
                 throw new BusinessException(
                         ErrorCode.VALIDATION_ERROR,
-                        "직군을 입력해 주세요."
+                        "직군은 최대 2개까지만 선택할 수 있습니다."
                 );
             }
-            // 프로젝트 직군 저장 - 최초 1회만
-            projectMember.updateProjectPosition(
-                    reviewReqDto.getProjectPosition(),
-                    reviewReqDto.getProjectDetailPosition()
-            );
+
+            projectMember.updateProjectPosition(positions);
         }
 
         Review savedReview = reviewRepository.save(reviewReqDto.toEntity(reviewer, reviewee, project));
@@ -132,28 +128,29 @@ public class ReviewService {
         List<SpectrumAxis> spectrumAxes = spectrumAxisRepository.findAllById(spectrumAxisIds);
 
         Map<Long, SpectrumAxis> spectrumAxisMap = spectrumAxes.stream()
-                        .collect(Collectors.toMap(SpectrumAxis::getSpectrumAxisId, axis -> axis));
+                .collect(Collectors.toMap(SpectrumAxis::getSpectrumAxisId, axis -> axis));
 
         if(spectrumAxisMap.size() != spectrumAxisIds.size()) {
             throw new BusinessException(ErrorCode.SPECTRUM_NOT_FOUND, "");
         }
 
         List<ReviewSpectrum> reviewSpectrums = reviewCreateReqDto.getSpectrumReqDtos().stream()
-                        .map(dto -> ReviewSpectrum.builder()
-                                .review(savedReview)
-                                .spectrumAxis(spectrumAxisMap.get(dto.getSpectrumAxisId()))
-                                .strength(dto.getSpectrumStrength())
-                                .build())
-                        .collect(Collectors.toList());
+                .map(dto -> ReviewSpectrum.builder()
+                        .review(savedReview)
+                        .spectrumAxis(spectrumAxisMap.get(dto.getSpectrumAxisId()))
+                        .strength(dto.getSpectrumStrength())
+                        .build())
+                .collect(Collectors.toList());
 
         reviewSpectrumRepository.saveAll(reviewSpectrums);
+        updateProjectStatus(project);
 
         return ReviewCreateResDto.from(savedReview, reviewTags, reviewSpectrums);
     }
 
     // 전체 후기 조회
     @Transactional(readOnly = true)
-    public ReviewCursorResDto getReviews(Principal principal, Long userId, Long cursor, int size) {
+    public ReviewCursorResDto getReviews(Principal principal, String userLink, Long cursor, int size) {
         // 페이지가 1 미만이면 오류 발생
         if (size < 1) throw new BusinessException(ErrorCode.INVALID_PAGE_SIZE_EXCEPTION, "");
 
@@ -161,7 +158,9 @@ public class ReviewService {
 
         int pageSize = Math.min(100, Math.max(1, size));
         Pageable pageable = PageRequest.of(0, size + 1);
-        List<Review> reviews = reviewRepository.findByRevieweeIdWithCursor(userId, cursor, pageable);
+
+        User reviewee = getUserByLink(userLink);
+        List<Review> reviews = reviewRepository.findByRevieweeIdWithCursor(reviewee.getId(), cursor, pageable);
 
         boolean hasNext = reviews.size() > size;
         if(hasNext) reviews = reviews.subList(0, size);
@@ -169,7 +168,7 @@ public class ReviewService {
         Long nextCursor = hasNext ? reviews.get(reviews.size() - 1).getReviewId() : null;
 
         // 내 후기 / 사용자 후기 조회 결정
-        boolean isMine = userId != null && userId.equals(loginUserId);
+        boolean isMine = reviewee.getId().equals(loginUserId);
 
         Map<String, ProjectMember> projectMemberMap = getProjectMemberMap(reviews);
 
@@ -193,13 +192,19 @@ public class ReviewService {
 
     // 프로젝트별 후기 조회
     @Transactional(readOnly = true)
-    public List<CommonReviewResDto> getReviewsByProject(Principal principal, Long userId, Long projectId) {
+    public List<CommonReviewResDto> getReviewsByProject(Principal principal, String userLink, Long projectId) {
         Long loginUserId = (principal != null) ? Long.parseLong(principal.getName()) : null;
-        List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(userId, projectId);
+
+        // 후기 열람 가능 여부 검증
+        Project project = getProject(projectId);
+        validateReviewOpen(project);
+
+        User reviewee = getUserByLink(userLink);
+        List<Review> reviews = reviewRepository.findAllByRevieweeIdAndProjectProjectId(reviewee.getId(), projectId);
 
         Map<String, ProjectMember> projectMemberMap = getProjectMemberMap(reviews);
 
-        boolean isMine = userId.equals(loginUserId);
+        boolean isMine = reviewee.getId().equals(loginUserId);
 
         return reviews.stream()
                 .map(review -> {
@@ -224,6 +229,41 @@ public class ReviewService {
                 m -> m,
                 (existing, replacement) -> existing
         ));
+    }
+
+    // 후기 열람 관련 검증 메소드
+    private void validateReviewOpen(Project project) {
+        if (project.getProjectStatus() == ProjectStatus.IN_PROGRESS) {
+            throw new BusinessException(
+                    ErrorCode.REVIEW_NOT_OPEN_EXCEPTION,
+                    "팀이 확정된 후에 후기를 열람할 수 있습니다."
+            );
+        }
+        if (project.getProjectStatus() == ProjectStatus.COMPLETED) {
+            throw new BusinessException(
+                    ErrorCode.REVIEW_NOT_OPEN_EXCEPTION,
+                    "모든 팀원의 후기 작성이 완료된 후 열람할 수 있습니다."
+            );
+        }
+    }
+
+    private void updateProjectStatus(Project project) {
+        // 팀 확정 상태에서만 체크
+        if (project.getProjectStatus() != ProjectStatus.COMPLETED) {
+            return;
+        }
+
+        if (isAllReviewCompleted(project)) {
+            project.updateProjectStatus(ProjectStatus.ARCHIVED);
+        }
+    }
+
+    private boolean isAllReviewCompleted(Project project) {
+        long memberCount = projectMemberRepository.countByProjectAndIsBannedFalse(project);
+        long reviewCount = reviewRepository.countActiveMemberReviews(project);
+        long totalReviewCount = (long) memberCount * (memberCount - 1);
+
+        return reviewCount == totalReviewCount;
     }
 
     // 후기 작성 가능 여부 검증
@@ -275,5 +315,12 @@ public class ReviewService {
         return userRepository.findByIdAndIsDeletedFalse(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION,
                         ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
+    }
+
+    private User getUserByLink(String userLink) {
+        return userRepository.findByUserLinkAndIsDeletedFalse(userLink)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userLink));
     }
 }

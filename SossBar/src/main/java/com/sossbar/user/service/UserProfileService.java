@@ -46,13 +46,13 @@ public class UserProfileService {
             newProfileImageUrl = uploadedImageUrl;
         }
 
-        // 직군 ETC 선택시 직접 직군 입력
-        if (userInfoUpdateReqDto.defaultPosition() == UserPosition.ETC
-                && (userInfoUpdateReqDto.defaultDetailPosition() == null
-                || userInfoUpdateReqDto.defaultDetailPosition().isBlank())) {
+        List<UserPosition> positions = userInfoUpdateReqDto.defaultPositions();
+
+        if (positions == null || positions.isEmpty() || positions.size() > 2) {
             throw new BusinessException(
                     ErrorCode.VALIDATION_ERROR,
-                    "직군을 입력해 주세요.");
+                    "직군은 최대 2개까지만 선택할 수 있습니다."
+            );
         }
 
         // 프로필 수정에서도 link 수정
@@ -72,8 +72,8 @@ public class UserProfileService {
     }
 
     // 프로필 페이지 - 사용자 프로필 조회, userId로 구분
-    public UserProfileInfoResDto getUserProfile(Long userId) {
-        User user = getUserById(userId);
+    public UserProfileInfoResDto getUserProfile(String userLink) {
+        User user = getUserByLink(userLink);
 
         return UserProfileInfoResDto.from(user);
     }
@@ -83,5 +83,11 @@ public class UserProfileService {
         return userRepository.findByIdAndIsDeletedFalse(userId).orElseThrow(
                 () -> new BusinessException(ErrorCode.USER_NOT_FOUND_EXCEPTION
                         , ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userId));
+    }
+    private User getUserByLink(String userLink) {
+        return userRepository.findByUserLinkAndIsDeletedFalse(userLink)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.USER_NOT_FOUND_EXCEPTION.getMessage() + userLink));
     }
 }

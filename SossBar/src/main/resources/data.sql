@@ -14,4 +14,4 @@ INSERT IGNORE INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('2�
 INSERT IGNORE INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('3번 항목', '상황별 유연한 대처', '철저한 계획 기반 실행');
 INSERT IGNORE INTO spectrum_axis(axis_name, left_label, right_label) VALUES ('4번 항목', '냉철한 결과 지향', '따뜻한 관계 지향');
 
-INSERT IGNORE INTO `user`(user_id, email, user_info_delete, username, user_type, marketing_agree) VALUES (1, 'test@sossbar.com', 0, '테스트 계정', 'LOCAL', 0);
+INSERT IGNORE INTO `user`(user_id, email, user_info_delete, username, user_type, marketing_agree, user_link) VALUES (1, 'test@sossbar.com', 0, '테스트 계정', 'LOCAL', 1, '5421247iuuisd');

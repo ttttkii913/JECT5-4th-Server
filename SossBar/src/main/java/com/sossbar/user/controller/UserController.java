@@ -22,7 +22,6 @@ import java.security.Principal;
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
-@SwaggerApiResTemplate
 @Tag(name = "User API", description = "사용자 관련 API - MyPage")
 public class UserController {
 
