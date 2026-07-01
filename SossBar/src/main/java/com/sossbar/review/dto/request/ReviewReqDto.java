@@ -29,10 +29,6 @@ public class ReviewReqDto {
 
     private List<Long> tagIds;
 
-    @NotNull
-    @Size(min = 1, max = 2)
-    private List<UserPosition> projectPositions;
-
     public Review toEntity(User reviewer, User reviewee, Project project) {
         return Review.builder()
                 .feedback(feedback)

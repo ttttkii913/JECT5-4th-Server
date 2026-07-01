@@ -4,6 +4,7 @@ import com.sossbar.global.common.code.SuccessCode;
 import com.sossbar.global.common.template.ApiResTemplate;
 import com.sossbar.global.common.template.SwaggerApiResTemplate;
 import com.sossbar.projects.dto.request.ProjectCreateRequest;
+import com.sossbar.projects.dto.request.ProjectPositionReqDto;
 import com.sossbar.projects.dto.request.ProjectUpdateRequest;
 import com.sossbar.projects.dto.response.MyProjectResponse;
 import com.sossbar.projects.dto.response.ProjectResponse;
@@ -33,8 +34,9 @@ public class ProjectMemberController {
     @Operation(summary = "팀원 추가", description = "프로젝트에 팀원을 추가하는 API입니다.")
     @PostMapping("/invite/{projectLink}")
     public ApiResTemplate<Void> inviteProjectMember(Principal principal,
-                                                    @PathVariable("projectLink") String projectLink) {
-        projectMemberService.inviteProjectMember(principal, projectLink);
+                                                    @PathVariable("projectLink") String projectLink,
+                                                    @Valid @RequestBody ProjectPositionReqDto projectPositionReqDto) {
+        projectMemberService.inviteProjectMember(principal, projectLink, projectPositionReqDto.projectPositions());
         return ApiResTemplate.successResponse(SuccessCode.CREATE_SUCCESS, null);
     }
 

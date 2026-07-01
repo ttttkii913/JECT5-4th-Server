@@ -24,7 +24,6 @@ import com.sossbar.spectrumaxis.repository.SpectrumAxisRepository;
 import com.sossbar.tag.entity.Tag;
 import com.sossbar.tag.repository.TagRepository;
 import com.sossbar.user.entity.User;
-import com.sossbar.user.entity.UserPosition;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -77,27 +76,6 @@ public class ReviewService {
                     ErrorCode.VALIDATION_ERROR,
                     reason.name()
             );
-        }
-
-        // 프로젝트 멤버 조회
-        ProjectMember projectMember = projectMemberRepository.findByProjectAndUser(project, reviewer)
-                .orElseThrow(() -> new BusinessException(
-                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
-                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
-                ));
-
-        List<UserPosition> positions = reviewReqDto.getProjectPositions();
-
-        if (projectMember.getProjectPosition1() == null) {
-
-            if (positions == null || positions.isEmpty() || positions.size() > 2) {
-                throw new BusinessException(
-                        ErrorCode.VALIDATION_ERROR,
-                        "직군은 최대 2개까지만 선택할 수 있습니다."
-                );
-            }
-
-            projectMember.updateProjectPosition(positions);
         }
 
         Review savedReview = reviewRepository.save(reviewReqDto.toEntity(reviewer, reviewee, project));

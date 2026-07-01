@@ -4,6 +4,7 @@ import com.sossbar.global.common.code.ErrorCode;
 import com.sossbar.global.common.exception.BusinessException;
 import com.sossbar.notification.entity.NotificationType;
 import com.sossbar.notification.service.NotificationService;
+import com.sossbar.projects.dto.request.ProjectPositionReqDto;
 import com.sossbar.projects.entity.Project;
 import com.sossbar.projects.entity.ProjectMember;
 import com.sossbar.projects.enums.MemberStatus;
@@ -12,6 +13,7 @@ import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.repository.ReviewRepository;
 import com.sossbar.user.entity.User;
+import com.sossbar.user.entity.UserPosition;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,7 +35,7 @@ public class ProjectMemberService {
 
     // 팀원 초대
     @Transactional
-    public void inviteProjectMember(Principal principal, String projectLink) {
+    public void inviteProjectMember(Principal principal, String projectLink, List<UserPosition> positions) {
         User user = getLoginUser(principal);
         Long loginUserId = user.getId();
         Project project = getProjectByLink(projectLink);
@@ -61,8 +63,8 @@ public class ProjectMemberService {
                 .project(project)
                 .user(user)
                 .memberStatus(MemberStatus.MEMBER)
-                .projectPosition1(null)
-                .projectPosition2(null)
+                .projectPosition1(positions.get(0))
+                .projectPosition2(positions.size() > 1 ? positions.get(1) : null)
                 .build();
 
         projectMemberRepository.save(projectMember);

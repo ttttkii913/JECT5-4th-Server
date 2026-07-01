@@ -2,12 +2,16 @@ package com.sossbar.projects.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sossbar.user.entity.UserLinkType;
+import com.sossbar.user.entity.UserPosition;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -34,4 +38,8 @@ public class ProjectCreateRequest {
 
     private String projectUrl; // 프로젝트 url e.g. github
     private UserLinkType projectUrlType;
+
+    @NotNull
+    @Size(min = 1, max = 2)
+    private List<UserPosition> projectPositions;
 }
