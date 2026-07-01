@@ -17,6 +17,7 @@ import com.sossbar.projects.repository.ProjectMemberRepository;
 import com.sossbar.projects.repository.ProjectRepository;
 import com.sossbar.review.repository.ReviewRepository;
 import com.sossbar.user.entity.User;
+import com.sossbar.user.entity.UserPosition;
 import com.sossbar.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -65,13 +66,15 @@ public class ProjectService {
                 .build();
         projectRepository.save(project);
 
+        List<UserPosition> positions = request.getProjectPositions();
+
         // 4. 생성자를 LEADER로 ProjectMember에 저장
         ProjectMember projectMember = ProjectMember.builder()
                 .user(user)
                 .project(project)
                 .memberStatus(MemberStatus.LEADER)
-                .projectPosition1(null)
-                .projectPosition2(null)
+                .projectPosition1(positions.get(0))
+                .projectPosition2(positions.size() > 1 ? positions.get(1) : null)
                 .build();
         projectMemberRepository.save(projectMember);
 
