@@ -1,20 +1,26 @@
-# Java 17 환경 제공
-FROM amazoncorretto:17
-
-# JAR 파일 경로를 ARG로 받음 (빌드 시 사용)
-ARG JAR_FILE=build/libs/*.jar
-
-# 작업 디렉토리 생성 (선택이지만 권장)
+# 1. 빌드 단계 (JDK 사용)
+FROM amazoncorretto:17 AS builder
 WORKDIR /app
 
-# JAR 파일을 복사하면서 이름을 고정
-COPY ${JAR_FILE} app.jar
+# 빌드 파일 복사
+COPY SossBar/gradlew .
+COPY SossBar/gradle gradle
+COPY SossBar/build.gradle .
+COPY SossBar/settings.gradle .
+COPY SossBar/src src
 
-# 포트 노출
+# 권한 부여 및 빌드 (bootJar)
+RUN chmod +x ./gradlew
+RUN ./gradlew bootJar
+
+# 2. 실행 단계 (가벼운 설정을 위해 JDK 대신 일반 이미지 사용 가능)
+FROM amazoncorretto:17
+WORKDIR /app
+
+# 빌드 결과물 복사
+COPY --from=builder /app/build/libs/*.jar app.jar
+
 EXPOSE 8080
 
-# 시간대를 Asia/Seoul로 설정
-RUN ln -snf /usr/share/zoneinfo/Asia/Seoul /etc/localtime && echo 'Asia/Seoul' > /etc/timezone
-
-# 애플리케이션 실행
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# 실행
+ENTRYPOINT ["java", "-jar", "app.jar"]
