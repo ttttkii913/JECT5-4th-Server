@@ -11,6 +11,7 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Builder
@@ -44,6 +45,42 @@ public class ProjectResponse {
         List<ProjectMemberResponse> memberResponses =
                 members.stream()
                         .map(ProjectMemberResponse::from)
+                        .toList();
+
+        return ProjectResponse.builder()
+                .projectId(project.getProjectId())
+                .projectName(project.getProjectName())
+                .host(project.getHost())
+                .startDate(project.getStartDate())
+                .endDate(project.getEndDate())
+                .projectLink(project.getProjectLink())
+                .projectImage(project.getProjectImage())
+                .projectStatus(project.getProjectStatus())
+                .members(memberResponses)
+                .memberCount(memberResponses.size())
+                .projectPositions(
+                        myMembership.getProjectPosition1() != null
+                                ? myMembership.getProjectPositions()
+                                : myMembership.getUser().getDefaultPositions()
+                )
+                .projectUrl(project.getProjectUrl())
+                .projectUrlType(project.getProjectUrlType())
+                .createdAt(project.getCreatedAt())
+                .build();
+    }
+
+    public static ProjectResponse from(
+            Project project,
+            List<ProjectMember> members,
+            ProjectMember myMembership,
+            Set<Long> reviewedRevieweeIds
+    ) {
+        List<ProjectMemberResponse> memberResponses =
+                members.stream()
+                        .map(pm -> ProjectMemberResponse.from(
+                                pm,
+                                reviewedRevieweeIds.contains(pm.getUser().getId())
+                        ))
                         .toList();
 
         return ProjectResponse.builder()

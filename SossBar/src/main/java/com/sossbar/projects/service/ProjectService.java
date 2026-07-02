@@ -152,8 +152,7 @@ public class ProjectService {
 
         // 3. 각 Project의 전체 멤버 조회 후 PublicProjectResponse로 변환
         return memberships.stream()
-                .filter(pm -> pm.getProject().getProjectStatus() == ProjectStatus.COMPLETED
-                || pm.getProject().getProjectStatus() == ProjectStatus.ARCHIVED) // 팀원 확정된 프로젝트 + 리뷰 작성 완료된 프로젝트만 필터링
+                .filter(pm -> pm.getProject().getProjectStatus() == ProjectStatus.ARCHIVED)// 리뷰 작성 완료된 프로젝트만 필터링
                 .map(PublicProjectResponse::from)
                 .toList();
     }
@@ -173,7 +172,26 @@ public class ProjectService {
                 ));
 
         List<ProjectMember> members = projectMemberRepository.findAllByProject(project);
-        return ProjectResponse.from(project, members, myMember);
+
+        Set<Long> reviewedRevieweeIds = reviewRepository.findRevieweeIdsByReviewerIdAndProjectId(loginUser.getId(), projectId);
+
+        return ProjectResponse.from(project, members, myMember, reviewedRevieweeIds);
+    }
+
+    // 프로필 페이지용 프로젝트 상세 조회
+    public PublicProjectResponse getUserDetailProject(String userLink, Long projectId) {
+
+        User user = getUserByLink(userLink);
+        Project project = getProjectById(projectId);
+
+        ProjectMember projectMember = projectMemberRepository
+                .findByProjectAndUser(project, user)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
+                ));
+
+        return PublicProjectResponse.from(projectMember);
     }
 
     // 프로젝트 상태 변경

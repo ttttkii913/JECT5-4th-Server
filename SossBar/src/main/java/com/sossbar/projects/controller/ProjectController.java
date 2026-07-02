@@ -85,4 +85,11 @@ public class ProjectController {
         projectFacade.deleteProject(projectId);
         return ApiResTemplate.successWithNoContent(SuccessCode.DELETE_SUCCESS);
     }
+
+    @Operation(summary = "유저 프로젝트 상세 정보 조회 - 공개 프로필 페이지용", description = "특정 유저가 속한 프로젝트 상세 정보를 조회하는 API입니다. - 공개 프로필 페이지용")
+    @GetMapping("/users/{userLink}/{projectId}")
+    public ApiResTemplate<PublicProjectResponse> getUserDetailProjects(@PathVariable("userLink") String userLink,
+                                                                       @PathVariable("projectId") Long projectId) {
+        return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, projectService.getUserDetailProject(userLink, projectId));
+    }
 }
