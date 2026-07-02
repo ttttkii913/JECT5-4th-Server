@@ -176,6 +176,22 @@ public class ProjectService {
         return ProjectResponse.from(project, members, myMember);
     }
 
+    // 프로필 페이지용 프로젝트 상세 조회
+    public PublicProjectResponse getUserDetailProject(String userLink, Long projectId) {
+
+        User user = getUserByLink(userLink);
+        Project project = getProjectById(projectId);
+
+        ProjectMember projectMember = projectMemberRepository
+                .findByProjectAndUser(project, user)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION,
+                        ErrorCode.PROJECT_MEMBER_NOT_FOUND_EXCEPTION.getMessage()
+                ));
+
+        return PublicProjectResponse.from(projectMember);
+    }
+
     // 프로젝트 상태 변경
     @Transactional
     public ProjectResponse updateProject(Long projectId, ProjectUpdateRequest request, String newImageUrl, Principal principal) {
