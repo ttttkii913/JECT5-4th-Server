@@ -31,12 +31,23 @@ public class ProjectFacade {
             imageUrl = s3Service.uploadFile(image, S3_DIR);
         }
 
-        // 2. DB 저장 - 실패 시 S3 보상 삭제
         try {
             return projectService.createProject(principal, request, imageUrl);
+
+        } catch (BusinessException e) {
+            if (imageUrl != null) {
+                s3Service.deleteFile(imageUrl);
+            }
+            throw e;
+
         } catch (Exception e) {
-            log.error("[ProjectFacade] {} {}", ErrorCode.PROJECT_CREATE_ROLLBACK_EXCEPTION.getMessage(), imageUrl, e);
-            s3Service.deleteFile(imageUrl);
+
+            log.error("[ProjectFacade] createProject", e);
+
+            if (imageUrl != null) {
+                s3Service.deleteFile(imageUrl);
+            }
+
             throw new BusinessException(
                     ErrorCode.PROJECT_CREATE_ROLLBACK_EXCEPTION,
                     ErrorCode.PROJECT_CREATE_ROLLBACK_EXCEPTION.getMessage() + imageUrl);
