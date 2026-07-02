@@ -2,6 +2,7 @@ package com.sossbar.review.controller;
 
 import com.sossbar.global.common.code.SuccessCode;
 import com.sossbar.global.common.template.ApiResTemplate;
+import com.sossbar.projects.enums.SortType;
 import com.sossbar.review.dto.request.ReviewCreateReqDto;
 import com.sossbar.review.dto.response.CommonReviewResDto;
 import com.sossbar.review.dto.response.ReviewCreateResDto;
@@ -36,25 +37,27 @@ public class ReviewController {
     }
 
     @Operation(summary = "전체 후기 조회", description = "특정 사용자에 대한 전체 후기를 조회할 수 있습니다.")
-    @GetMapping("/api/v1/users/{userId}/reviews")
+    @GetMapping("/api/v1/users/{userLink}/reviews")
     public ApiResTemplate<ReviewCursorResDto> getReviews(
             Principal principal,
-            @PathVariable Long userId,
+            @PathVariable("userLink") String userLink,
             @RequestParam(required = false) Long cursor,
-            @RequestParam(defaultValue = "5") int size
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "LATEST") SortType sort
     ) {
-        ReviewCursorResDto reviews = reviewService.getReviews(principal, userId, cursor, size);
+        ReviewCursorResDto reviews = reviewService.getReviews(principal, userLink, cursor, size, sort);
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, reviews);
     }
 
     @Operation(summary = "프로젝트별 후기 조회", description = "특정 프로젝트에 대한 후기를 조회할 수 있습니다.")
-    @GetMapping("/api/v1/users/{userId}/projects/{projectId}/reviews")
+    @GetMapping("/api/v1/users/{userLink}/projects/{projectId}/reviews")
     public ApiResTemplate<List<CommonReviewResDto>> getReviewsByProject(
             Principal principal,
-            @PathVariable Long userId,
-            @PathVariable Long projectId
+            @PathVariable("userLink") String userLink,
+            @PathVariable Long projectId,
+            @RequestParam(defaultValue = "LATEST") SortType sort
     ) {
-        List<CommonReviewResDto> reviews = reviewService.getReviewsByProject(principal, userId, projectId);
+        List<CommonReviewResDto> reviews = reviewService.getReviewsByProject(principal, userLink, projectId, sort);
         return ApiResTemplate.successResponse(SuccessCode.GET_SUCCESS, reviews);
     }
 

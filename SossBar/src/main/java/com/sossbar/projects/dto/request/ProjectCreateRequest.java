@@ -1,12 +1,17 @@
 package com.sossbar.projects.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sossbar.user.entity.UserLinkType;
+import com.sossbar.user.entity.UserPosition;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -22,4 +27,19 @@ public class ProjectCreateRequest {
     private String host;
 
     // 이미지는 MultipartFile로 별도 수신 (Controller의 @RequestPart("image") 참고)
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Schema(description = "프로젝트 시작 날짜", example = "2025-01-01T00:00:00")
+    private LocalDateTime startDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Schema(description = "프로젝트 종료 날짜", example = "2025-12-31T23:59:59")
+    private LocalDateTime endDate;
+
+    private String projectUrl; // 프로젝트 url e.g. github
+    private UserLinkType projectUrlType;
+
+    @NotNull
+    @Size(min = 1, max = 2)
+    private List<UserPosition> projectPositions;
 }

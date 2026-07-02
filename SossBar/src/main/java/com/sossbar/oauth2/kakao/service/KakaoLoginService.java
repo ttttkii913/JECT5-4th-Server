@@ -111,6 +111,7 @@ public class KakaoLoginService {
                                         .getProfileImageUrl()
                         )
                         .userType(UserType.KAKAO)
+                        .marketingAgree(true)
                         .build())
         );
 

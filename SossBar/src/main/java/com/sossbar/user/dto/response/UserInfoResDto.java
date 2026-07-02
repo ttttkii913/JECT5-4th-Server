@@ -1,8 +1,11 @@
 package com.sossbar.user.dto.response;
 
 import com.sossbar.user.entity.User;
+import com.sossbar.user.entity.UserPosition;
 import com.sossbar.user.entity.UserType;
 import lombok.Builder;
+
+import java.util.List;
 
 @Builder
 public record UserInfoResDto(
@@ -12,7 +15,12 @@ public record UserInfoResDto(
         String bio,
         String profileImageUrl,
         UserType userType,
-        boolean marketingAgree
+        List<UserPosition> defaultPositions,
+        List<UserLinkResDto> links,
+        boolean marketingAgree,
+
+        // 사용자만의 고유 uuid
+        String userLink
 
 ) {
     public static UserInfoResDto from(User user) {
@@ -23,7 +31,10 @@ public record UserInfoResDto(
                 .bio(user.getBio())
                 .profileImageUrl(user.getProfileImageUrl())
                 .userType(user.getUserType())
+                .defaultPositions(user.getDefaultPositions())
+                .links(user.getLinks().stream().map(UserLinkResDto::from).toList())
                 .marketingAgree(user.isMarketingAgree())
+                .userLink(user.getUserLink())
                 .build();
     }
 }

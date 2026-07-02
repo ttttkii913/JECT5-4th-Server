@@ -53,7 +53,12 @@ public enum ErrorCode {
     SELF_REVIEW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신에게 후기를 남길 수 없습니다.", "REVIEW-002"),
     TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "일부 태그가 존재하지 않습니다.", "REVIEW-003"),
     SPECTRUM_NOT_FOUND(HttpStatus.NOT_FOUND, "일부 스펙트럼이 존재하지 않습니다.", "REVIEW-004"),
-    INVALID_PAGE_SIZE_EXCEPTION(HttpStatus.BAD_REQUEST, "페이지 크기는 1 이상이어야 합니다.", "REVIEW-005");
+    INVALID_PAGE_SIZE_EXCEPTION(HttpStatus.BAD_REQUEST, "페이지 크기는 1 이상이어야 합니다.", "REVIEW-005"),
+    REVIEW_NOT_OPEN_EXCEPTION(HttpStatus.BAD_REQUEST, "후기를 열람할 수 없습니다.", "REVIEW-006"),
+
+    //NOTIFICATION
+    NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 알림이 존재하지 않습니다.", "NOTIFICATION-001"),
+    NOTIFICATION_NOT_AUTHORIZED(HttpStatus.FORBIDDEN,"해당 알림에 대한 권한이 없습니다.", "NOTIFICATION-002");
 
     private final HttpStatus httpStatus;
     private final String message;

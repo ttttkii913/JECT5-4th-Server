@@ -43,7 +43,7 @@ public class ProjectFacade {
         }
     }
 
-    public ProjectResponse updateProject(Long projectId, ProjectUpdateRequest request, MultipartFile image) {
+    public ProjectResponse updateProject(Long projectId, ProjectUpdateRequest request, MultipartFile image, Principal principal) {
         // 1. 기존 이미지 URL 미리 조회 (DB 수정 성공 후 기존 S3 이미지 삭제에 사용)
         String oldImageUrl = projectService.getProjectImageUrl(projectId);
 
@@ -56,18 +56,28 @@ public class ProjectFacade {
         // 3. DB 수정 - 실패 시 새로 올린 S3 이미지 보상 삭제
         ProjectResponse response;
         try {
-            response = projectService.updateProject(projectId, request, newImageUrl);
+            response = projectService.updateProject(projectId, request, newImageUrl, principal);
+
+        } catch (BusinessException e) {
+            // 비즈니스 예외는 그대로 전달
+            if (newImageUrl != null) {
+                s3Service.deleteFile(newImageUrl);
+            }
+            throw e;
+
         } catch (Exception e) {
-            log.error("[ProjectFacade] {} {}", ErrorCode.PROJECT_UPDATE_ROLLBACK_EXCEPTION.getMessage(), newImageUrl, e);
-            s3Service.deleteFile(newImageUrl);
+            log.error("[ProjectFacade] {} {}",
+                    ErrorCode.PROJECT_UPDATE_ROLLBACK_EXCEPTION.getMessage(),
+                    newImageUrl,
+                    e);
+
+            if (newImageUrl != null) {
+                s3Service.deleteFile(newImageUrl);
+            }
+
             throw new BusinessException(
                     ErrorCode.PROJECT_UPDATE_ROLLBACK_EXCEPTION,
                     ErrorCode.PROJECT_UPDATE_ROLLBACK_EXCEPTION.getMessage() + newImageUrl);
-        }
-
-        // 4. DB 수정 성공 후 기존 S3 이미지 삭제 (새 이미지가 있을 때만)
-        if (newImageUrl != null) {
-            s3Service.deleteFile(oldImageUrl);
         }
 
         return response;

@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/login")
-@SwaggerApiResTemplate
 @Tag(name = "Login API", description = "로그인 관련 API")
 public class KakaoLoginController {
 
