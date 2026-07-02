@@ -172,7 +172,10 @@ public class ProjectService {
                 ));
 
         List<ProjectMember> members = projectMemberRepository.findAllByProject(project);
-        return ProjectResponse.from(project, members, myMember);
+
+        Set<Long> reviewedRevieweeIds = reviewRepository.findRevieweeIdsByReviewerIdAndProjectId(loginUser.getId(), projectId);
+
+        return ProjectResponse.from(project, members, myMember, reviewedRevieweeIds);
     }
 
     // 프로필 페이지용 프로젝트 상세 조회
